@@ -10,20 +10,19 @@ export default function LandingPage() {
     <main className="min-h-screen flex flex-col bg-gradient-to-b from-[#05070B] via-[#020308] to-black">
       <Header />
 
-      {/* BANDA DE AVISO */}
+      {/* BANDA DE AVISO / URGENCIA */}
       <section className="border-b border-cyan-400/40 bg-cyan-600/90 text-center text-[11px] text-white py-2">
         <p>
-          No dejes pasar tu evaluación sin costo. Las condiciones dependen del
-          mes y del cupo disponible en cada plan.
+          Atención: los cupos de evaluación sin costo se actualizan cada 24 hs y dependen del mes y del cupo disponible en cada plan.
         </p>
       </section>
 
-      {/* HERO */}
+      {/* HERO LIMPIO */}
       <section
         id="hero"
-        className="px-6 md:px-16 lg:px-24 pt-10 pb-12 flex flex-col lg:flex-row items-center justify-center gap-10"
+        className="px-6 md:px-16 lg:px-24 pt-10 pb-12 flex flex-col items-center justify-center"
       >
-        <div className="max-w-xl space-y-6">
+        <div className="max-w-3xl space-y-6 text-left md:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
             <span className="text-[11px] uppercase tracking-[0.25em] text-gray-300">
@@ -38,13 +37,16 @@ export default function LandingPage() {
             <span className="text-gray-100">beneficio en cuotas</span>.
           </h1>
 
-          <p className="text-sm md:text-base text-gray-400">
-            Es un programa privado de asesoría inspirado en los planes
-            nacionales de ahorro, pensado para que más personas puedan llegar a
-            su 0km en cuotas previsibles. No es para todo el mundo: primero
-            evaluamos tu perfil, tu scoring y si tenés auto usado para tomar
-            llave por llave.
-          </p>
+          <div className="space-y-3">
+            <p className="text-sm md:text-base text-gray-300">
+              <span className="font-medium">
+                Plataforma oficial de pre-evaluación según scoring y cupo disponible.
+              </span>
+            </p>
+            <p className="text-sm md:text-base text-gray-400">
+              Si calificás, vas a poder acceder a opciones para tu 0km con beneficios exclusivos. Completá tus datos y un asesor autorizado te contactará con las alternativas vigentes según tu perfil.
+            </p>
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
             <a
@@ -55,9 +57,7 @@ export default function LandingPage() {
             </a>
             <div className="space-y-1">
               <p className="text-[11px] text-gray-400">
-                3 pasos simples: dejás tus datos, analizamos tu perfil y te
-                derivamos a un asesor para explicarte a qué tipo de plan podrías
-                acceder y en qué plazos.
+                Evaluación sin costo. No garantiza adjudicación ni entrega; todo queda sujeto a scoring, cupo y condiciones vigentes de cada concesionario.
               </p>
               <p className="text-[10px] text-gray-500">
                 PlanNacionalTu0km.com.ar es una plataforma privada de asesoría.{" "}
@@ -65,47 +65,6 @@ export default function LandingPage() {
                   No pertenece al Gobierno ni a organismos oficiales.
                 </span>
               </p>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD DEMO AUTO */}
-        <div className="w-full max-w-md">
-          <div className="relative rounded-[28px] border border-white/10 bg-gradient-to-br from-white/5 via-white/0 to-blue-900/30 p-5 overflow-hidden shadow-[0_0_80px_rgba(15,23,42,0.8)]">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-gray-300">
-                  Simulación referencial
-                </p>
-                <p className="text-sm text-gray-400">
-                  Plan Nacional tu 0km · Demo
-                </p>
-              </div>
-              <span className="rounded-full bg-emerald-400/10 text-emerald-300 text-[10px] px-3 py-1 border border-emerald-500/40">
-                Aprobación sujeta a scoring
-              </span>
-            </div>
-
-            <div className="aspect-[16/9] rounded-2xl border border-white/10 bg-gradient-to-br from-blue-900 via-slate-900 to-black flex items-center justify-center text-[11px] text-gray-400">
-              Aquí va la imagen principal del modelo destacado
-            </div>
-
-            <div className="mt-4 flex items-end justify-between">
-              <div>
-                <p className="text-xs text-gray-400 mb-1">
-                  Cuota estimada desde
-                </p>
-                <p className="text-2xl font-semibold">
-                  $000.000{" "}
-                  <span className="text-xs font-normal text-gray-400">
-                    / mes
-                  </span>
-                </p>
-              </div>
-              <div className="text-right text-[11px] text-gray-500">
-                <p>Valores ilustrativos.</p>
-                <p>La cuota final depende del modelo y del plan elegido.</p>
-              </div>
             </div>
           </div>
         </div>
