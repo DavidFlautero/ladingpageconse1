@@ -1,7 +1,11 @@
 import Header from "@/components/layout/Header";
 import LeadForm from "@/components/landing/LeadForm";
+import VehiclesGrid from "@/components/landing/VehiclesGrid";
 
 export default function LandingPage() {
+  // Más adelante esto vendrá desde una API / Supabase
+  const vehicles: any[] = [];
+
   return (
     <main className="min-h-screen flex flex-col bg-gradient-to-b from-[#05070B] via-[#020308] to-black">
       <Header />
@@ -10,7 +14,7 @@ export default function LandingPage() {
       <section className="border-b border-cyan-400/40 bg-cyan-600/90 text-center text-[11px] text-white py-2">
         <p>
           No dejes pasar tu evaluación sin costo. Las condiciones dependen del
-          mes y del cupo disponible en cada marca.
+          mes y del cupo disponible en cada plan.
         </p>
       </section>
 
@@ -100,7 +104,7 @@ export default function LandingPage() {
               </div>
               <div className="text-right text-[11px] text-gray-500">
                 <p>Valores ilustrativos.</p>
-                <p>La cuota final depende de la marca, modelo y plan elegido.</p>
+                <p>La cuota final depende del modelo y del plan elegido.</p>
               </div>
             </div>
           </div>
@@ -119,7 +123,7 @@ export default function LandingPage() {
           <p className="text-sm text-gray-400 mb-6">
             El objetivo es que entiendas el proceso antes de avanzar. No vendemos
             humo ni promesas imposibles: trabajamos en base a tu perfil real y a
-            las condiciones vigentes en cada marca.
+            las condiciones vigentes en cada concesionario oficial.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
@@ -156,88 +160,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* MARCAS Y PLANES */}
+      {/* AUTOS AMPARADOS (GRID DINÁMICO DESDE PANEL) */}
       <section
         id="marcas"
         className="px-6 md:px-16 lg:px-24 py-10 border-t border-white/5 bg-black/70"
       >
         <div className="max-w-5xl mx-auto">
           <h2 className="text-xl md:text-2xl font-semibold mb-2">
-            Marcas y tipos de planes que trabajamos
+            Autos amparados por el Plan Nacional tu 0km
           </h2>
           <p className="text-sm text-gray-400 mb-6">
-            No nos casamos con una sola marca. El objetivo es encontrar el
-            esquema que mejor encaje con tu situación: plan de ahorro, entrega
-            pactada, usado como parte de pago, etc. Estas son algunas líneas
-            habituales:
+            Desde el panel interno vas a poder cargar modelos por marca,
+            definir la cuota estimada, el texto comercial y hasta 4 fotos por
+            vehículo. Acá se mostrarán automáticamente hasta 9 vehículos
+            destacados (3 filas de 3 autos) para que el usuario vea ejemplos de
+            unidades alcanzadas por el beneficio.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="border border-white/10 rounded-2xl p-4 bg-white/5 flex flex-col justify-between">
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300">
-                  Segmento 1
-                </p>
-                <p className="font-medium text-gray-100">
-                  Planes Volkswagen / Chevrolet
-                </p>
-                <p className="text-gray-400 text-[13px]">
-                  Opciones de ahorro y entrega pactada en modelos de alta
-                  rotación. Ideal para quienes pueden esperar un plazo corto /
-                  medio.
-                </p>
-              </div>
-              <a
-                href="#form"
-                className="mt-3 inline-flex text-[11px] text-blue-300 hover:text-blue-200 underline underline-offset-2"
-              >
-                Quiero ver si entro en este tipo de plan
-              </a>
-            </div>
-
-            <div className="border border-white/10 rounded-2xl p-4 bg-white/5 flex flex-col justify-between">
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300">
-                  Segmento 2
-                </p>
-                <p className="font-medium text-gray-100">
-                  Planes Fiat / Renault / Peugeot
-                </p>
-                <p className="text-gray-400 text-[13px]">
-                  Alternativas con diferentes niveles de cuota, bonificaciones y
-                  posibilidades de tomar un usado llave por llave.
-                </p>
-              </div>
-              <a
-                href="#form"
-                className="mt-3 inline-flex text-[11px] text-blue-300 hover:text-blue-200 underline underline-offset-2"
-              >
-                Quiero que me asesoren en estas marcas
-              </a>
-            </div>
-
-            <div className="border border-white/10 rounded-2xl p-4 bg-white/5 flex flex-col justify-between">
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300">
-                  Segmento 3
-                </p>
-                <p className="font-medium text-gray-100">
-                  Otras marcas y casos especiales
-                </p>
-                <p className="text-gray-400 text-[13px]">
-                  Si buscás otra marca o ya estás en un plan, también podés
-                  dejar tus datos para analizar tu caso puntual y ver opciones
-                  de mejora.
-                </p>
-              </div>
-              <a
-                href="#form"
-                className="mt-3 inline-flex text-[11px] text-blue-300 hover:text-blue-200 underline underline-offset-2"
-              >
-                Completar evaluación de perfil
-              </a>
-            </div>
-          </div>
+          <VehiclesGrid vehicles={vehicles} />
         </div>
       </section>
 
@@ -278,7 +218,7 @@ export default function LandingPage() {
               </p>
               <p className="text-[11px] text-gray-400">
                 Analizamos tu caso de forma individual, según scoring, ingresos,
-                zona y disponibilidad de cada marca.
+                zona y disponibilidad de cada concesionario.
               </p>
             </div>
 
