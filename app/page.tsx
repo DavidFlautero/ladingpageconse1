@@ -35,13 +35,13 @@ export default async function LandingPage() {
       {/* HERO LIMPIO SIN TARJETA */}
       <section
         id="hero"
-        className="px-6 md:px-10 lg:px-20 pt-10 pb-6 flex flex-col items-center justify-center"
+        className="px-6 md:px-10 lg:px-20 pt-8 pb-6 flex flex-col items-center justify-center"
       >
         <div className="max-w-5xl w-full space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-sky-50 px-3 py-1">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             <span className="text-[11px] uppercase tracking-[0.25em] text-sky-700">
-              Evaluación de acceso a tu 0km
+              Consulta para planes 0km
             </span>
           </div>
 
@@ -49,24 +49,21 @@ export default async function LandingPage() {
             <h1 className="text-3xl md:text-4xl lg:text-[2.7rem] leading-tight font-semibold text-slate-900">
               Conocé el{" "}
               <span className="text-sky-700">Plan Nacional tu 0km</span> y enterate si
-              podés acceder a un{" "}
+              podés acceder a{" "}
               <span className="underline decoration-sky-300 decoration-[5px] underline-offset-[6px]">
-                beneficio en cuotas
+                cuotas y beneficios especiales
               </span>
               .
             </h1>
 
             <div className="space-y-2 text-sm md:text-[15px]">
               <p className="text-slate-800">
-                <span className="font-semibold">
-                  Pre-evaluación sin costo según scoring y cupo disponible.
-                </span>{" "}
-                Si calificás, vas a poder acceder a opciones para tu 0km con beneficios
-                exclusivos.
+                Dejá tu consulta y un asesor oficial te va a contactar con opciones de planes
+                0km en cuotas, según tu perfil y el cupo disponible en cada concesionario.
               </p>
               <p className="text-slate-600">
-                Completá tus datos y un asesor autorizado te contactará con alternativas
-                vigentes según tu perfil, horario y forma de contacto preferida.
+                No es un plan del Gobierno ni una página oficial del Estado: es una plataforma
+                privada de asesoría que te conecta con distintas alternativas del mercado.
               </p>
             </div>
           </div>
@@ -76,7 +73,7 @@ export default async function LandingPage() {
               href="#form"
               className="px-7 py-3 rounded-full bg-sky-700 hover:bg-sky-600 text-sm font-medium text-white shadow-[0_14px_40px_rgba(15,118,110,0.28)] transition transform hover:-translate-y-[1px]"
             >
-              Evaluar mi caso ahora
+              Enviar mi consulta
             </a>
 
             <Link
@@ -90,8 +87,8 @@ export default async function LandingPage() {
 
             <div className="space-y-1 max-w-xs">
               <p className="text-[11px] text-slate-600">
-                Evaluación sin costo. No garantiza adjudicación ni entrega; todo queda
-                sujeto a scoring, cupo y condiciones vigentes de cada concesionario.
+                La consulta no tiene costo ni compromiso de compra. Las propuestas dependen de
+                tu perfil crediticio y de los cupos disponibles en cada marca.
               </p>
               <p className="text-[10px] text-slate-500">
                 PlanNacionalTu0km.com.ar es una plataforma privada de asesoría.{" "}
@@ -131,42 +128,39 @@ export default async function LandingPage() {
       >
         <div className="max-w-5xl mx-auto">
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
-            ¿Cómo funciona el Plan Nacional tu 0km?
+            ¿Cómo funciona?
           </h2>
           <p className="text-sm text-slate-600 mb-6">
-            El objetivo es que entiendas el proceso antes de avanzar. No vendemos humo ni
-            promesas imposibles: trabajamos en base a tu perfil real y a las condiciones
-            vigentes en cada concesionario oficial.
+            El proceso es simple: dejás tus datos, un asesor revisa las alternativas para tu
+            perfil y te explica opciones de planes 0km en cuotas, sin obligación de compra.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
               <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-1">
-                Paso 1 · Formulario
+                Paso 1 · Consulta
               </p>
               <p className="text-slate-800">
-                Completás tus datos de contacto, provincia, localidad, entrega pactada
-                deseada y si tenés auto usado para entregar llave por llave.
+                Completás tus datos de contacto, provincia, localidad, entrega pactada deseada y
+                si tenés auto usado para entregar llave por llave.
               </p>
             </div>
             <div className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
               <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-1">
-                Paso 2 · Evaluación
+                Paso 2 · Análisis
               </p>
               <p className="text-slate-800">
-                Nuestro sistema analiza tu perfil (scoring, ingresos, zona) y define qué tipo
-                de esquema podría aplicar: 3, 6, 8 o 12 meses de entrega pactada, según cupo
-                y condiciones.
+                El asesor revisa tu perfil (scoring, ingresos, zona) y qué opciones de planes 0km
+                podrían aplicar según los cupos del momento.
               </p>
             </div>
             <div className="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm">
               <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500 mb-1">
-                Paso 3 · Asesoría
+                Paso 3 · Propuesta
               </p>
               <p className="text-slate-800">
-                Un asesor se comunica con vos por WhatsApp o teléfono para explicarte
-                opciones concretas y derivarte al concesionario oficial que pueda tomar tu
-                caso.
+                Te contactan por WhatsApp o teléfono para explicarte propuestas concretas y, si te
+                interesa, derivarte al concesionario oficial que pueda tomar tu caso.
               </p>
             </div>
           </div>
@@ -181,12 +175,12 @@ export default async function LandingPage() {
         <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-10 items-start">
           <div className="bg-white border border-slate-200 rounded-3xl shadow-[0_18px_45px_rgba(15,23,42,0.06)] p-5 md:p-6">
             <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
-              Completá tu evaluación sin costo y vemos si podés acceder a un plan.
+              Completá el formulario y recibí propuestas de planes 0km en cuotas.
             </h2>
             <p className="text-sm text-slate-600 mb-6">
-              Este formulario llega directo al panel interno. Un asesor revisa tu scoring,
-              la entrega que te interesa (3, 6, 8, 12 meses, etc.), tu horario preferido y si
-              tenés auto usado para tomar llave por llave.
+              Este formulario llega directo al panel interno. Un asesor revisa tu scoring, la
+              entrega que te interesa, tu horario preferido y si tenés auto usado para tomar llave
+              por llave.
             </p>
             <LeadForm />
           </div>
@@ -200,17 +194,9 @@ export default async function LandingPage() {
                 Entrega pactada y perfil
               </p>
               <p className="text-[13px] mb-2 text-slate-700">
-                No todos los casos son iguales. En base a tu historial y al cupo del momento,
-                podemos trabajar entregas pactadas a:
-              </p>
-              <p className="text-[13px] mb-2 text-slate-800">
-                <strong>3, 6, 8 o 12 meses</strong>, y en algunos casos plazos más largos. La
-                idea es que tengas una hoja de ruta clara desde el inicio, sin promesas
-                imposibles.
-              </p>
-              <p className="text-[11px] text-slate-500">
-                Analizamos tu caso de forma individual, según scoring, ingresos, zona y
-                disponibilidad de cada concesionario.
+                En base a tu historial y al cupo del momento, se pueden trabajar diferentes
+                esquemas de entrega (3, 6, 8, 12 meses, etc.). La idea es que tengas una hoja de
+                ruta clara desde el inicio.
               </p>
             </div>
 
@@ -226,10 +212,6 @@ export default async function LandingPage() {
                 <li>
                   Podemos trabajar esquemas <strong>llave por llave</strong>: entregás tu auto
                   actual cuando retirás el nuevo.
-                </li>
-                <li>
-                  Cuanto más claro nos expliques tu auto (marca, modelo, año, estado), mejor
-                  propuesta te vamos a poder armar.
                 </li>
               </ul>
             </div>
