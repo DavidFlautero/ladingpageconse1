@@ -2,10 +2,10 @@ import Link from "next/link";
 import Header from "@/components/layout/Header";
 import LeadForm from "@/components/landing/LeadForm";
 import VehiclesGrid from "@/components/landing/VehiclesGrid";
-import { getWhatsappNumber } from "@/lib/config";
 import AnnouncementBar from "@/components/landing/AnnouncementBar";
 import EntryModal from "@/components/landing/EntryModal";
 import FloatingActions from "@/components/landing/FloatingActions";
+import { getWhatsappNumber } from "@/lib/config";
 
 function buildWhatsAppUrl(rawNumber?: string | null) {
   const fallback = "5491112345678";
@@ -21,69 +21,102 @@ export default async function LandingPage() {
   const whatsappNumber = await getWhatsappNumber();
   const whatsappUrl = buildWhatsAppUrl(whatsappNumber);
 
-  // Más adelante esto vendrá desde Supabase
+  // Más adelante vendrá desde Supabase
   const vehicles: any[] = [];
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#f6f3ec] text-slate-900">
+    <main className="min-h-screen bg-[#f3f1eb] text-slate-900">
       <Header />
-
       <AnnouncementBar />
       <EntryModal />
       <FloatingActions whatsappUrl={whatsappUrl} />
 
-      {/* HERO SIMPLE */}
+      {/* HERO PREMIUM SIMPLE Y ENFOCADO EN LEADS */}
       <section
+        id="hero"
+        className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white px-6 md:px-10 lg:px-20 py-16 md:py-20"
+      >
+        <div className="max-w-5xl mx-auto space-y-6">
+          <h1 className="text-3xl md:text-4xl lg:text-[2.6rem] font-semibold leading-tight">
+            Consultá si podés acceder a tu{" "}
+            <span className="text-sky-400">0km en cuotas</span> según tu perfil.
+          </h1>
+
+          <p className="max-w-xl text-[15px] text-slate-200">
+            Dejás tus datos una sola vez y un asesor oficial te contacta con opciones
+            de concesionarios autorizados. Sin costo, sin venta directa desde este
+            sitio y sin compromiso de compra.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="#form"
+              className="px-7 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-sm font-medium text-white shadow-[0_18px_40px_rgba(56,189,248,0.45)] transition"
+            >
+              Enviar consulta
+            </a>
+
+            <Link
+              href={whatsappUrl}
+              target="_blank"
+              className="px-7 py-3 rounded-full border border-sky-300/70 text-sm font-medium text-sky-200 hover:bg-sky-800/40 transition"
+            >
+              Hablar por WhatsApp
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-4 text-[13px] text-slate-300 pt-2">
+            <span>• Consulta sin costo</span>
+            <span>• Sin afectar tu scoring</span>
+            <span>• Derivación a concesionarios oficiales</span>
+          </div>
+        </div>
       </section>
 
-      {/* AUTOS */}
-      <section
-        id="marcas"
-        className="px-6 md:px-10 lg:px-20 pt-2 pb-10 border-t border-slate-200 bg-[#f6f3ec]"
-      >
-        <div className="max-w-5xl mx-auto">
+      {/* AUTOS ALCANZADOS POR EL BENEFICIO */}
+      <section id="marcas" className="px-6 md:px-10 lg:px-20 py-10">
+        <div className="max-w-5xl mx-auto rounded-3xl bg-[#f8f5ef] border border-slate-200/70 shadow-[0_16px_45px_rgba(15,23,42,0.15)] px-5 py-7 md:px-8 md:py-9">
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
             Autos alcanzados por el beneficio
           </h2>
-          <p className="text-sm text-slate-600 mb-6">
-            Desde el panel interno vas a cargar los modelos y cuotas de referencia. En la
-            landing el usuario sólo ve ejemplos de unidades en promoción (3 filas de 3
-            autos como máximo) para motivar la consulta.
+          <p className="text-sm text-slate-600 mb-6 max-w-2xl">
+            Desde el panel interno vas a poder cargar los modelos de referencia, las
+            cuotas estimadas y hasta 4 fotos por vehículo. En la landing se muestran
+            solo algunos ejemplos para motivar la consulta (hasta 9 vehículos
+            destacados).
           </p>
 
           <VehiclesGrid vehicles={vehicles} />
         </div>
       </section>
 
-      {/* FORMULARIO PRINCIPAL (UNA COLUMNA) */}
-      <section
-        id="form"
-        className="border-t border-slate-200 bg-[#fdfaf5] px-6 md:px-10 lg:px-20 py-10"
-      >
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white border border-slate-200 rounded-3xl shadow-[0_18px_45px_rgba(15,23,42,0.06)] p-5 md:p-6">
+      {/* FORMULARIO PRINCIPAL (PANTALLA CLAVE PARA EL LEAD) */}
+      <section id="form" className="px-6 md:px-10 lg:px-20 pb-14">
+        <div className="max-w-5xl mx-auto rounded-3xl bg-white border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-5 py-8 md:px-8 md:py-10">
+          <div className="max-w-3xl mb-6">
             <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
-              Enviá tu consulta para acceder a cuotas y beneficios en tu 0km.
+              Completá tu consulta para evaluar acceso a cuotas y beneficios.
             </h2>
-            <p className="text-sm text-slate-600 mb-5">
+            <p className="text-sm text-slate-600">
               Un asesor oficial va a revisar tu perfil, zona y si tenés auto usado para
-              tomar como parte de pago, y se comunicará con vos por WhatsApp o teléfono
+              tomar llave por llave. Después te va a contactar por WhatsApp o teléfono
               con las alternativas vigentes.
             </p>
-
-            <LeadForm />
           </div>
 
-          <div className="mt-4 space-y-1 text-[11px] text-slate-600">
+          <LeadForm />
+
+          <div className="mt-4 space-y-1 text-[11px] text-slate-600 max-w-3xl">
             <p>
-              La información mostrada es orientativa y puede variar según marca, modelo y
-              concesionario. Las condiciones finales se acuerdan directamente con la
-              concesionaria oficial.
+              La información que recibas puede variar según marca, modelo, concesionario
+              y condiciones del momento. Las propuestas finales se acuerdan directamente
+              con la concesionaria oficial.
             </p>
             <p className="text-[10px]">
-              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No pertenece
-              al Estado Nacional, Gobierno ni organismos oficiales. No realizamos venta
-              directa: sólo derivamos consultas a concesionarios oficiales.
+              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No
+              pertenece al Estado Nacional, Gobierno ni organismos oficiales. No
+              realizamos venta directa: solo derivamos consultas a concesionarios
+              autorizados.
             </p>
           </div>
         </div>
@@ -91,54 +124,3 @@ export default async function LandingPage() {
     </main>
   );
 }
-      {/* HERO PREMIUM */}
-      <section
-        id="hero"
-        className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white px-6 md:px-10 lg:px-20 py-20"
-      >
-        <div className="max-w-5xl mx-auto flex flex-col items-start gap-6">
-
-          <h1 className="text-3xl md:text-5xl font-semibold leading-tight">
-            Accedé a tu <span className="text-sky-400">0km</span> en cuotas según tu perfil.
-          </h1>
-
-          <p className="text-slate-300 max-w-xl text-[15px]">
-            Dejás tus datos y un asesor oficial te contacta con las alternativas vigentes de concesionarios autorizados. Sin costo, sin venta directa, sin compromiso.
-          </p>
-
-          <div className="flex gap-4 flex-wrap">
-            <a
-              href="#form"
-              className="px-7 py-3 rounded-full bg-sky-600 hover:bg-sky-500 text-white font-medium shadow-lg"
-            >
-              Enviar consulta
-            </a>
-
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              className="px-7 py-3 rounded-full border border-sky-300 text-sky-300 hover:bg-sky-700/30 transition"
-            >
-              Hablar por WhatsApp
-            </a>
-          </div>
-
-          <div className="flex gap-6 text-[13px] text-slate-400 mt-4">
-            <span>• Consulta sin costo</span>
-            <span>• Sin afectar tu scoring</span>
-            <span>• Asesores certificados</span>
-          </div>
-        </div>
-      </section>
-      <section id="form" className="bg-[#faf8f2] py-16 px-6">
-        <div className="max-w-5xl mx-auto bg-white rounded-3xl p-8 shadow-xl border border-slate-200">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-2">
-            Completá tu consulta
-          </h2>
-          <p className="text-slate-600 text-sm mb-6">
-            Un asesor oficial te contactará con las alternativas vigentes.
-          </p>
-
-          <LeadForm />
-        </div>
-      </section>
