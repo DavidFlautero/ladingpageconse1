@@ -72,15 +72,12 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-            <button
-              onClick={() => {
-                const el = document.getElementById("form");
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
+            <a
+              href="#form"
               className="px-7 py-3 rounded-full bg-sky-700 hover:bg-sky-600 text-sm font-medium text-white shadow-[0_14px_40px_rgba(15,118,110,0.28)] transition transform hover:-translate-y-[1px]"
             >
               Evaluar mi caso ahora
-            </button>
+            </a>
 
             <Link
               href={whatsappUrl}
