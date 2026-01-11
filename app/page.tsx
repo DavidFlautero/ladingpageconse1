@@ -19,7 +19,7 @@ function buildWhatsAppUrl(rawNumber?: string | null) {
 
 export default async function LandingPage() {
   const whatsappNumber = await getWhatsappNumber();
-  const whatsappUrl = buildWhatsappUrl(whatsappNumber);
+  const whatsappUrl = buildWhatsAppUrl(whatsappNumber);
 
   // Más adelante vendrá desde Supabase
   const vehicles: any[] = [];
