@@ -65,7 +65,7 @@ export default function LeadForm() {
           <input
             name="brand"
             placeholder="Ej: Volkswagen"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
         <div className="space-y-1">
@@ -75,7 +75,7 @@ export default function LeadForm() {
           <input
             name="model"
             placeholder="Ej: Polo, T-Cross, Nivus..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
       </div>
@@ -89,7 +89,7 @@ export default function LeadForm() {
           <input
             name="fullName"
             required
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
         <div className="space-y-1">
@@ -100,7 +100,7 @@ export default function LeadForm() {
             name="email"
             type="email"
             required
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
       </div>
@@ -114,8 +114,8 @@ export default function LeadForm() {
           <input
             name="areaCode"
             required
-            placeholder="Ej: 11"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            placeholder="Ej: 011"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
         <div className="space-y-1">
@@ -126,7 +126,7 @@ export default function LeadForm() {
             name="phone"
             required
             placeholder="Ej: 1234 5678"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
           />
         </div>
       </div>
@@ -140,19 +140,19 @@ export default function LeadForm() {
           name="location"
           required
           placeholder="Ej: CABA, GBA Oeste, Córdoba capital..."
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
         />
       </div>
 
       {/* Horario de contacto + Canal */}
-      <div className="grid grid-cols-1 md:grid-cols-[1.2fr,1.2fr,1.1fr] gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-[1.1fr,1.1fr,1.1fr] gap-3">
         <div className="space-y-1">
           <label className="block text-[12px] font-medium text-slate-700">
             Horario desde
           </label>
           <select
             name="contactFrom"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
             defaultValue=""
           >
             <option value="">Seleccionar</option>
@@ -168,7 +168,7 @@ export default function LeadForm() {
           </label>
           <select
             name="contactTo"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
             defaultValue=""
           >
             <option value="">Seleccionar</option>
@@ -184,7 +184,7 @@ export default function LeadForm() {
           </label>
           <select
             name="channel"
-            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
             defaultValue="whatsapp"
           >
             <option value="whatsapp">WhatsApp</option>
@@ -203,7 +203,7 @@ export default function LeadForm() {
           name="message"
           rows={3}
           placeholder="Contanos brevemente qué estás buscando (0km, financiación, entrega estimada, etc.)."
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 resize-none"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 resize-none"
         />
       </div>
 
