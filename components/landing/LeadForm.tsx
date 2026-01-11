@@ -15,16 +15,33 @@ const ENTREGA_OPCIONES = [
 const TIPO_PLAN_OPCIONES = [
   "Plan de ahorro (cuotas)",
   "0km adjudicado / entrega rápida",
-  "Usado + plan (llave por llave)",
+  "Usado + 0km (llave por llave)",
+];
+
+const HORARIO_OPCIONES = [
+  "Mañana (9 a 13 hs)",
+  "Tarde (13 a 18 hs)",
+  "Noche (18 a 21 hs)",
+];
+
+const PREFERENCIA_CONTACTO = [
+  "WhatsApp",
+  "Llamado telefónico",
+  "Indistinto",
 ];
 
 export default function LeadForm() {
   const [tipoPlan, setTipoPlan] = useState(TIPO_PLAN_OPCIONES[0]);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [provincia, setProvincia] = useState("");
   const [localidad, setLocalidad] = useState("");
   const [entrega, setEntrega] = useState(ENTREGA_OPCIONES[0]);
+  const [horario, setHorario] = useState<string | null>(HORARIO_OPCIONES[0]);
+  const [preferencia, setPreferencia] = useState<string | null>(
+    PREFERENCIA_CONTACTO[0]
+  );
   const [tieneUsado, setTieneUsado] = useState<"si" | "no" | "">("");
   const [autoUsado, setAutoUsado] = useState("");
   const [comentario, setComentario] = useState("");
@@ -54,6 +71,14 @@ export default function LeadForm() {
     partesNotas.push(`Tipo de plan: ${tipoPlan}`);
     partesNotas.push(`Entrega pactada deseada: ${entrega}`);
 
+    if (horario) {
+      partesNotas.push(`Horario preferido de contacto: ${horario}`);
+    }
+
+    if (preferencia) {
+      partesNotas.push(`Medio de contacto preferido: ${preferencia}`);
+    }
+
     if (tieneUsado) {
       partesNotas.push(
         `¿Tiene auto usado?: ${tieneUsado === "si" ? "Sí" : "No"}`
@@ -66,6 +91,10 @@ export default function LeadForm() {
 
     if (comentario.trim()) {
       partesNotas.push(`Comentarios adicionales: ${comentario.trim()}`);
+    }
+
+    if (email.trim()) {
+      partesNotas.push(`Email: ${email.trim()}`);
     }
 
     const notes = partesNotas.join(" | ");
@@ -96,15 +125,18 @@ export default function LeadForm() {
 
       setStatus("ok");
       setMessage(
-        "Perfecto, recibimos tu consulta. Un asesor te va a escribir por WhatsApp."
+        "Perfecto, recibimos tu consulta. Un asesor te va a escribir según el horario que indicaste."
       );
 
       setTipoPlan(TIPO_PLAN_OPCIONES[0]);
       setName("");
       setPhone("");
+      setEmail("");
       setProvincia("");
       setLocalidad("");
       setEntrega(ENTREGA_OPCIONES[0]);
+      setHorario(HORARIO_OPCIONES[0]);
+      setPreferencia(PREFERENCIA_CONTACTO[0]);
       setTieneUsado("");
       setAutoUsado("");
       setComentario("");
@@ -126,6 +158,7 @@ export default function LeadForm() {
       onSubmit={handleSubmit}
       className="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
+      {/* Bloque: Qué estás buscando */}
       <div className="md:col-span-2 space-y-1">
         <label className="text-xs text-slate-700">
           ¿Qué tipo de plan te interesa?
@@ -143,6 +176,7 @@ export default function LeadForm() {
         </select>
       </div>
 
+      {/* Tus datos */}
       <div className="space-y-1">
         <label className="text-xs text-slate-700">Nombre y apellido</label>
         <input
@@ -167,6 +201,18 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
+        <label className="text-xs text-slate-700">Email (opcional)</label>
+        <input
+          type="email"
+          className={inputClass}
+          placeholder="Ej: tucorreo@mail.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </div>
+
+      {/* Dónde vivís */}
+      <div className="space-y-1">
         <label className="text-xs text-slate-700">Provincia</label>
         <input
           className={inputClass}
@@ -186,6 +232,7 @@ export default function LeadForm() {
         />
       </div>
 
+      {/* Entrega pactada */}
       <div className="space-y-1">
         <label className="text-xs text-slate-700">
           Entrega pactada que te gustaría
@@ -207,6 +254,42 @@ export default function LeadForm() {
         </p>
       </div>
 
+      {/* Horario y preferencia de contacto */}
+      <div className="space-y-1">
+        <label className="text-xs text-slate-700">
+          Horario preferido de contacto
+        </label>
+        <select
+          className={selectClass}
+          value={horario ?? ""}
+          onChange={(e) => setHorario(e.target.value || null)}
+        >
+          {HORARIO_OPCIONES.map((op) => (
+            <option key={op} value={op}>
+              {op}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-1">
+        <label className="text-xs text-slate-700">
+          ¿Cómo preferís que te contacten?
+        </label>
+        <select
+          className={selectClass}
+          value={preferencia ?? ""}
+          onChange={(e) => setPreferencia(e.target.value || null)}
+        >
+          {PREFERENCIA_CONTACTO.map((op) => (
+            <option key={op} value={op}>
+              {op}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Auto usado */}
       <div className="space-y-1">
         <label className="text-xs text-slate-700">
           ¿Tenés auto usado para entregar?
@@ -249,6 +332,7 @@ export default function LeadForm() {
         />
       </div>
 
+      {/* Comentarios */}
       <div className="md:col-span-2 space-y-1">
         <label className="text-xs text-slate-700">Comentarios adicionales</label>
         <textarea
