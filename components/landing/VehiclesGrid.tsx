@@ -21,8 +21,8 @@ export default function VehiclesGrid({ vehicles }: VehiclesGridProps) {
 
   if (visibleVehicles.length === 0) {
     return (
-      <div className="border border-dashed border-white/15 rounded-2xl px-4 py-6 text-[12px] text-gray-400 bg-white/[0.02]">
-        <p className="font-medium text-gray-200 mb-1">
+      <div className="border border-dashed border-slate-300 rounded-2xl px-4 py-6 text-[12px] text-slate-600 bg-white/70">
+        <p className="font-medium text-slate-800 mb-1">
           Próximamente vas a ver acá los modelos amparados por el Plan Nacional tu 0km.
         </p>
         <p>
@@ -43,9 +43,9 @@ export default function VehiclesGrid({ vehicles }: VehiclesGridProps) {
         return (
           <article
             key={auto.id}
-            className="border border-white/10 rounded-2xl bg-white/5 overflow-hidden flex flex-col"
+            className="border border-slate-200 rounded-2xl bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col overflow-hidden"
           >
-            <div className="relative aspect-[4/3] border-b border-white/10 bg-gradient-to-br from-blue-900 via-slate-900 to-black flex items-center justify-center text-[11px] text-gray-400">
+            <div className="relative aspect-[4/3] border-b border-slate-200 bg-slate-50 flex items-center justify-center text-[11px] text-slate-500">
               {mainImage ? (
                 // Cuando conectemos Storage, acá va el <Image /> de Next
                 <span className="px-3 text-center">
@@ -60,25 +60,24 @@ export default function VehiclesGrid({ vehicles }: VehiclesGridProps) {
 
             <div className="p-4 flex flex-col flex-1">
               <div className="space-y-1 mb-2">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300">
+                <p className="text-[11px] uppercase tracking-[0.16em] text-slate-500">
                   {auto.brand}
                 </p>
-                <p className="font-medium text-gray-100">
-                  {auto.modelName}
-                </p>
+                <p className="font-medium text-slate-900">{auto.modelName}</p>
                 {auto.title && (
-                  <p className="text-[12px] text-gray-400">{auto.title}</p>
+                  <p className="text-[12px] text-slate-600">{auto.title}</p>
                 )}
               </div>
 
               {auto.quotaAmount != null && (
                 <div className="mb-2">
-                  <p className="text-[11px] text-gray-400">
+                  <p className="text-[11px] text-slate-500">
                     {auto.quotaLabel || "Cuota estimada desde"}
                   </p>
-                  <p className="text-lg font-semibold text-gray-100">
-                    {auto.currency || "ARS"} {auto.quotaAmount.toLocaleString("es-AR")}
-                    <span className="text-[11px] font-normal text-gray-400">
+                  <p className="text-lg font-semibold text-slate-900">
+                    {auto.currency || "ARS"}{" "}
+                    {auto.quotaAmount.toLocaleString("es-AR")}
+                    <span className="text-[11px] font-normal text-slate-500">
                       {" "}
                       / mes
                     </span>
@@ -87,14 +86,14 @@ export default function VehiclesGrid({ vehicles }: VehiclesGridProps) {
               )}
 
               {auto.description && (
-                <p className="text-[12px] text-gray-400 flex-1">
+                <p className="text-[12px] text-slate-600 flex-1">
                   {auto.description}
                 </p>
               )}
 
               <a
                 href="#form"
-                className="mt-3 inline-flex text-[11px] text-blue-300 hover:text-blue-200 underline underline-offset-2"
+                className="mt-3 inline-flex text-[11px] text-sky-700 hover:text-sky-600 underline underline-offset-2"
               >
                 Quiero que me asesoren sobre este tipo de plan
               </a>

@@ -55,7 +55,9 @@ export default function LeadForm() {
     partesNotas.push(`Entrega pactada deseada: ${entrega}`);
 
     if (tieneUsado) {
-      partesNotas.push(`¿Tiene auto usado?: ${tieneUsado === "si" ? "Sí" : "No"}`);
+      partesNotas.push(
+        `¿Tiene auto usado?: ${tieneUsado === "si" ? "Sí" : "No"}`
+      );
     }
 
     if (autoUsado.trim()) {
@@ -113,15 +115,23 @@ export default function LeadForm() {
     }
   }
 
+  const inputClass =
+    "w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 bg-white transition";
+
+  const selectClass =
+    "w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100 bg-white transition";
+
   return (
     <form
       onSubmit={handleSubmit}
       className="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
       <div className="md:col-span-2 space-y-1">
-        <label className="text-xs text-gray-300">¿Qué tipo de plan te interesa?</label>
+        <label className="text-xs text-slate-700">
+          ¿Qué tipo de plan te interesa?
+        </label>
         <select
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={selectClass}
           value={tipoPlan}
           onChange={(e) => setTipoPlan(e.target.value)}
         >
@@ -134,9 +144,9 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">Nombre y apellido</label>
+        <label className="text-xs text-slate-700">Nombre y apellido</label>
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={inputClass}
           placeholder="Ej: Juan Pérez"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -144,11 +154,11 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">
-          WhatsApp <span className="text-red-400">*</span>
+        <label className="text-xs text-slate-700">
+          WhatsApp <span className="text-red-500">*</span>
         </label>
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={inputClass}
           placeholder="Ej: +54 11 0000 0000"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
@@ -157,9 +167,9 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">Provincia</label>
+        <label className="text-xs text-slate-700">Provincia</label>
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={inputClass}
           placeholder="Ej: Buenos Aires"
           value={provincia}
           onChange={(e) => setProvincia(e.target.value)}
@@ -167,9 +177,9 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">Localidad / Ciudad</label>
+        <label className="text-xs text-slate-700">Localidad / Ciudad</label>
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={inputClass}
           placeholder="Ej: Avellaneda"
           value={localidad}
           onChange={(e) => setLocalidad(e.target.value)}
@@ -177,11 +187,11 @@ export default function LeadForm() {
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">
+        <label className="text-xs text-slate-700">
           Entrega pactada que te gustaría
         </label>
         <select
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={selectClass}
           value={entrega}
           onChange={(e) => setEntrega(e.target.value)}
         >
@@ -191,24 +201,24 @@ export default function LeadForm() {
             </option>
           ))}
         </select>
-        <p className="text-[11px] text-gray-500">
+        <p className="text-[11px] text-slate-500">
           La entrega real se define según tu scoring y el cupo disponible (3, 6,
           8, 12 meses, etc.).
         </p>
       </div>
 
       <div className="space-y-1">
-        <label className="text-xs text-gray-300">
+        <label className="text-xs text-slate-700">
           ¿Tenés auto usado para entregar?
         </label>
-        <div className="flex gap-3 text-xs text-gray-300">
+        <div className="flex gap-3 text-xs text-slate-700">
           <button
             type="button"
             onClick={() => setTieneUsado("si")}
-            className={`px-3 py-1.5 rounded-full border ${
+            className={`px-3 py-1.5 rounded-full border text-xs ${
               tieneUsado === "si"
-                ? "border-emerald-500 bg-emerald-500/10 text-emerald-300"
-                : "border-white/15 bg-white/5 hover:bg-white/10"
+                ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                : "border-slate-300 bg-white hover:bg-slate-50"
             }`}
           >
             Sí, tengo usado
@@ -216,10 +226,10 @@ export default function LeadForm() {
           <button
             type="button"
             onClick={() => setTieneUsado("no")}
-            className={`px-3 py-1.5 rounded-full border ${
+            className={`px-3 py-1.5 rounded-full border text-xs ${
               tieneUsado === "no"
-                ? "border-gray-500 bg-gray-500/10 text-gray-200"
-                : "border-white/15 bg-white/5 hover:bg-white/10"
+                ? "border-slate-500 bg-slate-100 text-slate-800"
+                : "border-slate-300 bg-white hover:bg-slate-50"
             }`}
           >
             No tengo usado
@@ -228,11 +238,11 @@ export default function LeadForm() {
       </div>
 
       <div className="md:col-span-2 space-y-1">
-        <label className="text-xs text-gray-300">
+        <label className="text-xs text-slate-700">
           Si tenés auto usado, contanos cuál (marca, modelo, año, estado)
         </label>
         <input
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
+          className={inputClass}
           placeholder="Ej: Fiat Cronos 2020, 60.000km, titular al día"
           value={autoUsado}
           onChange={(e) => setAutoUsado(e.target.value)}
@@ -240,9 +250,9 @@ export default function LeadForm() {
       </div>
 
       <div className="md:col-span-2 space-y-1">
-        <label className="text-xs text-gray-300">Comentarios adicionales</label>
+        <label className="text-xs text-slate-700">Comentarios adicionales</label>
         <textarea
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition min-h-[90px]"
+          className={`${inputClass} min-h-[90px]`}
           placeholder="Ej: Marca preferida, uso que le vas a dar, si ya estás en algún plan, etc."
           value={comentario}
           onChange={(e) => setComentario(e.target.value)}
@@ -252,7 +262,7 @@ export default function LeadForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="md:col-span-2 mt-1 px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-sm font-medium transition"
+        className="md:col-span-2 mt-1 px-6 py-3 rounded-full bg-sky-700 hover:bg-sky-600 disabled:opacity-60 text-sm font-medium text-white transition"
       >
         {status === "loading" ? "Enviando..." : "Quiero que me asesoren"}
       </button>
@@ -260,7 +270,7 @@ export default function LeadForm() {
       {status !== "idle" && (
         <p
           className={`md:col-span-2 text-[12px] mt-1 ${
-            status === "ok" ? "text-emerald-400" : "text-red-400"
+            status === "ok" ? "text-emerald-600" : "text-red-600"
           }`}
         >
           {message}
