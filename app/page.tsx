@@ -112,7 +112,7 @@ export default async function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white border border-slate-200 rounded-3xl shadow-[0_18px_45px_rgba(15,23,42,0.06)] p-5 md:p-6">
             <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
-              Enviá tu consulta para planes 0km en cuotas.
+              Enviá tu consulta para acceder a cuotas y beneficios en tu 0km.
             </h2>
             <p className="text-sm text-slate-600 mb-5">
               Un asesor oficial va a revisar tu perfil, zona y si tenés auto usado para

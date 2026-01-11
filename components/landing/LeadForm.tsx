@@ -105,8 +105,8 @@ export default function LeadForm() {
         </div>
       </div>
 
-      {/* Teléfono */}
-      <div className="grid grid-cols-[0.8fr,1.6fr] md:grid-cols-[0.6fr,1.4fr] gap-3">
+      {/* Teléfono: Cód. de área + Teléfono en la misma fila */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-1">
           <label className="block text-[12px] font-medium text-slate-700">
             Cód. de área *
@@ -144,8 +144,8 @@ export default function LeadForm() {
         />
       </div>
 
-      {/* Horario de contacto + Canal */}
-      <div className="grid grid-cols-1 md:grid-cols-[1.1fr,1.1fr,1.1fr] gap-3">
+      {/* Horario desde / hasta / canal en una fila en desktop */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="space-y-1">
           <label className="block text-[12px] font-medium text-slate-700">
             Horario desde
