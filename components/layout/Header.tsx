@@ -4,51 +4,50 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur">
-      <div className="max-w-6xl mx-auto px-6 md:px-8 lg:px-0 h-16 flex items-center justify-between gap-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full border border-blue-400/60 bg-gradient-to-br from-blue-500/30 via-slate-900 to-black flex items-center justify-center text-[10px] font-semibold tracking-[0.18em] text-blue-100">
-            0KM
+    <header className="sticky top-0 z-30 bg-[#fdfaf5]/90 backdrop-blur border-b border-slate-200/60">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:px-6">
+        {/* Marca */}
+        <Link href="#hero" className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-sky-600 via-sky-500 to-teal-500 shadow-[0_8px_20px_rgba(37,99,235,0.35)]">
+            <span className="text-[11px] font-semibold text-white">0km</span>
           </div>
-          <div className="leading-tight">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-100">
-              PLAN NACIONAL TU 0KM
-            </p>
-            <p className="text-[10px] text-gray-400">
+          <div className="flex flex-col leading-tight">
+            <span className="text-[13px] font-semibold text-slate-900">
+              Plan Nacional tu 0km
+            </span>
+            <span className="text-[11px] text-slate-500">
               Plataforma privada de asesoría vehicular
-            </p>
+            </span>
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 text-[11px] text-gray-300">
-          <a href="#como-funciona" className="hover:text-white transition">
-            Cómo funciona
+        {/* Navegación desktop */}
+        <nav className="hidden items-center gap-6 text-[13px] text-slate-700 md:flex">
+          <a href="#hero" className="hover:text-sky-700 transition">
+            Inicio
           </a>
-          <a href="#marcas" className="hover:text-white transition">
-            Marcas y planes
+          <a href="#marcas" className="hover:text-sky-700 transition">
+            Autos disponibles
           </a>
-          <a href="#beneficios" className="hover:text-white transition">
-            Beneficios
+          <a href="#form" className="hover:text-sky-700 transition">
+            Consulta
           </a>
-          <a href="#preguntas" className="hover:text-white transition">
-            Preguntas frecuentes
+
+          <a
+            href="#form"
+            className="ml-2 inline-flex items-center justify-center rounded-full bg-sky-700 px-4 py-2 text-[12px] font-medium text-white shadow-[0_10px_28px_rgba(15,118,110,0.35)] hover:bg-sky-600 transition"
+          >
+            Enviar consulta
           </a>
         </nav>
 
-        <div className="flex items-center gap-2">
-          <a
-            href="#form"
-            className="hidden sm:inline-flex text-[11px] px-3 py-1.5 rounded-full border border-blue-500/70 bg-blue-600/80 hover:bg-blue-500 text-white font-medium transition"
-          >
-            Evaluar mi caso
-          </a>
-          <Link
-            href="/login"
-            className="text-[11px] text-gray-400 hover:text-white transition"
-          >
-            Ingresar
-          </Link>
-        </div>
+        {/* Botón simple en mobile */}
+        <a
+          href="#form"
+          className="inline-flex items-center justify-center rounded-full bg-sky-700 px-4 py-2 text-[12px] font-medium text-white shadow-[0_10px_24px_rgba(15,118,110,0.35)] hover:bg-sky-600 transition md:hidden"
+        >
+          Enviar consulta
+        </a>
       </div>
     </header>
   );
