@@ -36,7 +36,7 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <div className="relative overflow-hidden rounded-3xl shadow-[0_28px_80px_rgba(15,23,42,0.65)]">
             {/* Imagen de fondo */}
-            <div className="absolute inset-0 bg-[url('/hero-0km.jpg')] bg-cover bg-center" />
+            <div className="absolute inset-0 bg-[url('/hero-0km.png')] bg-cover bg-center" />
             {/* Capa oscura para legibilidad */}
             <div className="absolute inset-0 bg-slate-950/60" />
 
