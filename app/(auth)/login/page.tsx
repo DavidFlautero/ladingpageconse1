@@ -1,50 +1,110 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+// Cliente público para login
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error) {
+        setErrorMsg(error.message || "No se pudo iniciar sesión.");
+        setLoading(false);
+        return;
+      }
+
+      // Login OK → redirigimos al panel
+      router.push("/admin");
+    } catch (err: any) {
+      console.error("Error login:", err);
+      setErrorMsg("Ocurrió un error inesperado. Intentá de nuevo.");
+      setLoading(false);
+    }
+  }
+
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-black via-[#050815] to-black">
-      <div className="w-full max-w-md">
+    <main className="min-h-screen bg-[#f3f1eb] flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] p-6 md:p-8">
         <div className="mb-6 text-center">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-gray-400">
-            Panel interno · Demo
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-2">
+            Panel interno
           </p>
-          <h1 className="mt-2 text-2xl font-semibold">
-            Ingresar al panel de planes
+          <h1 className="text-xl font-semibold text-slate-900">
+            Iniciar sesión
           </h1>
-          <p className="mt-1 text-xs text-gray-500">
-            Pronto vamos a conectar este acceso con Supabase Auth.
+          <p className="text-[13px] text-slate-600 mt-1">
+            Acceso exclusivo para concesionarios y administradores.
           </p>
         </div>
 
-        <div className="relative rounded-[26px] border border-white/10 bg-black/70 backdrop-blur-sm p-7 shadow-[0_0_60px_rgba(15,23,42,0.85)]">
-          <div className="absolute -inset-px rounded-[26px] border border-white/5 opacity-30 pointer-events-none" />
-          <form className="space-y-4 relative z-10">
-            <div className="space-y-1">
-              <label className="text-xs text-gray-300">Email</label>
-              <input
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
-                placeholder="admin@tusitio.com"
-                type="email"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-gray-300">Contraseña</label>
-              <input
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:bg-white/10 transition"
-                placeholder="••••••••"
-                type="password"
-              />
-            </div>
-            <button
-              type="button"
-              className="w-full bg-blue-600 hover:bg-blue-500 rounded-full py-2.5 text-sm font-medium transition mt-2"
-            >
-              Entrar (demo)
-            </button>
-          </form>
-          <p className="mt-4 text-[11px] text-center text-gray-500">
-            En la versión final solo vos vas a poder entrar a este panel con tu
-            usuario.
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-[12px] font-medium text-slate-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+              placeholder="admin@tu0km.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[12px] font-medium text-slate-700 mb-1">
+              Contraseña
+            </label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+              placeholder="••••••••"
+            />
+          </div>
+
+          {errorMsg && (
+            <p className="text-[12px] text-red-600">
+              {errorMsg}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-full bg-sky-700 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-sky-600 transition disabled:opacity-70"
+          >
+            {loading ? "Ingresando..." : "Entrar"}
+          </button>
+
+          <p className="mt-3 text-[11px] text-slate-500 text-center">
+            Si no tenés usuario, solicitá acceso al administrador del sistema.
           </p>
-        </div>
+        </form>
       </div>
     </main>
   );
