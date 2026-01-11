@@ -1,39 +1,39 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/config";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Si estás usando Edge y te da problemas, descomentá esto:
+// export const runtime = "nodejs";
 
 export async function GET() {
-  const { data, error } = await supabase
-    .from("config")
-    .select("value")
-    .eq("key", "whatsapp_number")
-    .maybeSingle();
-
-  if (error) {
-    console.error(error);
-    return NextResponse.json({ whatsappNumber: null }, { status: 500 });
+  if (!supabase) {
+    return NextResponse.json(
+      { error: "Supabase no está configurado en el entorno (env vars faltantes)." },
+      { status: 500 }
+    );
   }
 
-  return NextResponse.json({
-    whatsappNumber: data?.value ?? null,
-  });
-}
+  try {
+    // EJEMPLO: ajustá esto a lo que realmente hacías
+    const { data, error } = await supabase
+      .from("config_whatsapp")
+      .select("*")
+      .limit(1)
+      .maybeSingle();
 
-export async function POST(req: Request) {
-  const body = await req.json();
-  const whatsappNumber = (body.whatsappNumber || "").toString();
+    if (error) {
+      console.error("Error al leer config de WhatsApp:", error);
+      return NextResponse.json(
+        { error: "No se pudo obtener la configuración de WhatsApp." },
+        { status: 500 }
+      );
+    }
 
-  const { error } = await supabase
-    .from("config")
-    .upsert({ key: "whatsapp_number", value: whatsappNumber });
-
-  if (error) {
-    console.error(error);
-    return NextResponse.json({ ok: false }, { status: 500 });
+    return NextResponse.json({ config: data ?? null });
+  } catch (err) {
+    console.error("Error inesperado en /api/config/whatsapp:", err);
+    return NextResponse.json(
+      { error: "Error interno en la API de configuración de WhatsApp." },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({ ok: true });
 }
