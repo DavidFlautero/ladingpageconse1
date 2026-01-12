@@ -2,12 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,21 +19,52 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
+      const endpoint = `${supabaseUrl.replace(/\/$/, "")}/auth/v1/token?grant_type=password`;
+
+      console.log("AUTH_ENDPOINT:", endpoint);
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: supabaseAnonKey,
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+        }),
       });
 
-      if (error) {
-        setErrorMsg(`Error al iniciar sesión: ${error.message}`);
+      console.log("AUTH_STATUS:", res.status);
+
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const data = await res.json();
+          detail = data?.error_description || data?.message || JSON.stringify(data);
+        } catch {
+          detail = await res.text();
+        }
+
+        setErrorMsg(
+          `Error al iniciar sesión (status ${res.status}): ${
+            detail || "credenciales inválidas o error en el servidor"
+          }`
+        );
         setLoading(false);
         return;
       }
 
+      // Si llega aquí, Supabase devolvió un token válido
+      const data = await res.json();
+      console.log("AUTH_SUCCESS_PAYLOAD:", data);
+
+      // TODO: acá podrías guardar el access_token en cookies/localStorage
+      // por ahora, simplemente redirigimos al panel
       router.push("/admin");
     } catch (err: any) {
       console.error("Error login (catch):", err);
-      setErrorMsg("Error inesperado al conectar con Supabase.");
+      setErrorMsg(`Error de red: ${err?.message || "No se pudo conectar con Supabase"}`);
       setLoading(false);
     }
   }
@@ -103,7 +131,7 @@ export default function LoginPage() {
             Si no tenés usuario, solicitá acceso al administrador del sistema.
           </p>
 
-          {/* DEBUG TEMPORAL: ELIMINAR DESPUÉS */}
+          {/* DEBUG TEMPORAL: podés borrar esto después */}
           <div className="mt-4 border-t border-slate-200 pt-2">
             <p className="text-[10px] text-slate-500">
               DEBUG URL: <span className="font-mono">{supabaseUrl}</span>
