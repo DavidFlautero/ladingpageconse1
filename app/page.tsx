@@ -141,7 +141,9 @@ export default async function LandingPage() {
             </p>
           </div>
         </div>
+		
       </section>
     </main>
   );
 }
+
