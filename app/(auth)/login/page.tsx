@@ -7,14 +7,6 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Debug rápido: asegurarnos de que el frontend ve las env vars
-console.log("SUPABASE_URL (login):", supabaseUrl);
-console.log(
-  "SUPABASE_KEY definida?:",
-  typeof supabaseAnonKey === "string" && supabaseAnonKey.length > 0
-);
-
-// Cliente público para login
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function LoginPage() {
@@ -34,8 +26,6 @@ export default function LoginPage() {
         email: email.trim(),
         password,
       });
-
-      console.log("SUPABASE LOGIN RESPONSE:", { data, error });
 
       if (error) {
         setErrorMsg(`Error al iniciar sesión: ${error.message}`);
@@ -112,6 +102,21 @@ export default function LoginPage() {
           <p className="mt-3 text-[11px] text-slate-500 text-center">
             Si no tenés usuario, solicitá acceso al administrador del sistema.
           </p>
+
+          {/* DEBUG TEMPORAL: ELIMINAR DESPUÉS */}
+          <div className="mt-4 border-t border-slate-200 pt-2">
+            <p className="text-[10px] text-slate-500">
+              DEBUG URL: <span className="font-mono">{supabaseUrl}</span>
+            </p>
+            <p className="text-[10px] text-slate-500">
+              DEBUG KEY prefix:{" "}
+              <span className="font-mono">
+                {typeof supabaseAnonKey === "string"
+                  ? supabaseAnonKey.slice(0, 15)
+                  : "no-key"}
+              </span>
+            </p>
+          </div>
         </form>
       </div>
     </main>
