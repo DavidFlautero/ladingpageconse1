@@ -32,14 +32,14 @@ export default function LeadForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre,
-          email,
+          email: email || null,
           telefono_codigo: codArea || null,
           telefono_numero: telefono,
           provincia: provinciaLocalidad || null,
           localidad: null,
           horario_desde: horarioDesde || null,
           horario_hasta: horarioHasta || null,
-          canal_contacto: canal,
+          canal_contacto: canal || null,
           marca_interes: marcaInteres || null,
           modelo_interes: modeloInteres || null,
           mensaje: consulta || null,
@@ -53,11 +53,14 @@ export default function LeadForm() {
 
       setStatus("ok");
 
-      // Limpio algunos campos importantes
+      // Limpio campos principales
       setNombre("");
       setEmail("");
       setCodArea("");
       setTelefono("");
+      setProvinciaLocalidad("");
+      setHorarioDesde("");
+      setHorarioHasta("");
       setConsulta("");
     } catch (err: any) {
       console.error("Error al enviar lead:", err);
@@ -73,7 +76,7 @@ export default function LeadForm() {
       onSubmit={handleSubmit}
       className="space-y-4 text-sm text-slate-900"
     >
-      {/* Nombre + Email */}
+      {/* Nombre + Email (solo nombre obligatorio) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -90,20 +93,19 @@ export default function LeadForm() {
         </div>
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
-            Email *
+            Email
           </label>
           <input
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="Ej: nombre@correo.com"
+            placeholder="Opcional"
             className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
 
-      {/* Cód. área + Teléfono */}
+      {/* Cód. área + Teléfono (ambos obligatorios) */}
       <div className="grid grid-cols-[0.7fr_1.3fr] gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -135,22 +137,21 @@ export default function LeadForm() {
         </div>
       </div>
 
-      {/* Provincia / localidad */}
+      {/* Provincia / localidad (opcional) */}
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-600">
-          Provincia / localidad *
+          Provincia / localidad
         </label>
         <input
           type="text"
-          required
           value={provinciaLocalidad}
           onChange={(e) => setProvinciaLocalidad(e.target.value)}
-          placeholder="Ej: CABA, GBA Oeste, Córdoba capital..."
+          placeholder="Opcional (Ej: CABA, GBA Oeste, Córdoba capital...)"
           className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>
 
-      {/* Horarios */}
+      {/* Horarios (opcionales) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -161,7 +162,7 @@ export default function LeadForm() {
             onChange={(e) => setHorarioDesde(e.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
-            <option value="">Seleccionar</option>
+            <option value="">Cualquiera</option>
             <option value="09:00">09 hs</option>
             <option value="10:00">10 hs</option>
             <option value="11:00">11 hs</option>
@@ -180,7 +181,7 @@ export default function LeadForm() {
             onChange={(e) => setHorarioHasta(e.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
-            <option value="">Seleccionar</option>
+            <option value="">Cualquiera</option>
             <option value="13:00">13 hs</option>
             <option value="14:00">14 hs</option>
             <option value="18:00">18 hs</option>
@@ -190,7 +191,7 @@ export default function LeadForm() {
         </div>
       </div>
 
-      {/* Canal + Marca + Modelo */}
+      {/* Canal + Marca + Modelo (opcionales) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className="mb-1 block text-xs font-medium text-slate-600">
@@ -232,13 +233,13 @@ export default function LeadForm() {
             type="text"
             value={modeloInteres}
             onChange={(e) => setModeloInteres(e.target.value)}
-            placeholder="Ej: Polo, T-Cross, Nivus..."
+            placeholder="Opcional (Polo, T-Cross, etc.)"
             className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
 
-      {/* Consulta */}
+      {/* Consulta (opcional) */}
       <div>
         <label className="mb-1 block text-xs font-medium text-slate-600">
           Tu consulta
@@ -247,7 +248,7 @@ export default function LeadForm() {
           rows={3}
           value={consulta}
           onChange={(e) => setConsulta(e.target.value)}
-          placeholder="Contanos brevemente qué estás buscando (0km, financiación, entrega estimada, etc.)."
+          placeholder="Opcional: contanos qué estás buscando (0km, financiación, entrega, etc.)."
           className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>
@@ -255,23 +256,22 @@ export default function LeadForm() {
       {/* Mensajes de estado */}
       {status === "ok" && (
         <p className="text-xs text-emerald-600">
-          ¡Gracias! Recibimos tu consulta. Un asesor te va a contactar a la
-          brevedad.
+          ¡Listo! Reservaste tu cupo. Un asesor te va a contactar a la brevedad.
         </p>
       )}
       {status === "error" && (
         <p className="text-xs text-red-600">
-          {errorMsg || "No se pudo enviar la consulta. Intentá nuevamente."}
+          {errorMsg || "No se pudo guardar tu cupo. Intentá nuevamente."}
         </p>
       )}
 
-      {/* Botón */}
+      {/* Botón principal */}
       <button
         type="submit"
         disabled={status === "loading"}
         className="mt-1 inline-flex w-full items-center justify-center rounded-full bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(37,99,235,0.45)] hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
       >
-        {status === "loading" ? "Enviando..." : "Enviar consulta"}
+        {status === "loading" ? "Guardando..." : "Reservar mi cupo ahora"}
       </button>
     </form>
   );

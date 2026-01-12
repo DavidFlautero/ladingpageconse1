@@ -16,7 +16,7 @@ export default function EntryModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
-      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)]">
+      <div className="relative w-full max-w-xl rounded-3xl border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)]">
         {/* Botón cerrar */}
         <button
           onClick={() => setOpen(false)}
@@ -27,21 +27,22 @@ export default function EntryModal() {
           ✕
         </button>
 
-        <div className="px-6 pt-6 pb-4">
-          <div className="mb-4 text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-600 mb-1">
-              Consulta rápida
+        <div className="px-5 pt-5 pb-4">
+          <div className="mb-3 text-center">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sky-600 mb-1">
+              Cupos limitados
             </p>
-            <h2 className="text-lg font-semibold text-slate-900">
-              Enviá tu consulta
+            <h2 className="text-base font-semibold text-slate-900">
+              Reservá tu cupo de asesoría 0km
             </h2>
-            <p className="mt-1 text-xs text-slate-600">
-              Un asesor oficial va a revisar tu información y te contactará en
-              el horario que elijas. Sin costo inicial ni compromiso de compra.
+            <p className="mt-1 text-[11px] text-slate-600">
+              Con sólo completar el formulario vas a recibir opciones vigentes,
+              bonificaciones y condiciones para llegar a tu 0km en cuotas.
+              Un asesor oficial te va a contactar por WhatsApp o teléfono
+              en el horario que elijas. Sin costo inicial ni compromiso de compra.
             </p>
           </div>
 
-          {/* Formulario */}
           <LeadForm />
         </div>
       </div>
