@@ -7,100 +7,76 @@ type Status = "idle" | "loading" | "ok" | "error";
 export default function LeadForm() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
-  const [telCodigo, setTelCodigo] = useState("");
-  const [telNumero, setTelNumero] = useState("");
-  const [provincia, setProvincia] = useState("");
-  const [localidad, setLocalidad] = useState("");
+  const [codArea, setCodArea] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [provinciaLocalidad, setProvinciaLocalidad] = useState("");
   const [horarioDesde, setHorarioDesde] = useState("");
   const [horarioHasta, setHorarioHasta] = useState("");
   const [canal, setCanal] = useState("WhatsApp");
-  const [comentario, setComentario] = useState("");
-  const [marcaInteres, setMarcaInteres] = useState("");
+  const [marcaInteres, setMarcaInteres] = useState("Volkswagen");
   const [modeloInteres, setModeloInteres] = useState("");
-
+  const [consulta, setConsulta] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (status === "loading") return;
+
     setStatus("loading");
     setErrorMsg(null);
 
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nombre,
           email,
-          telefonoCodigo: telCodigo,
-          telefonoNumero: telNumero,
-          provincia,
-          localidad,
-          horarioDesde,
-          horarioHasta,
-          canalContacto: canal,
-          comentario,
-          marcaInteres,
-          modeloInteres,
+          telefono_codigo: codArea || null,
+          telefono_numero: telefono,
+          provincia: provinciaLocalidad || null,
+          localidad: null,
+          horario_desde: horarioDesde || null,
+          horario_hasta: horarioHasta || null,
+          canal_contacto: canal,
+          marca_interes: marcaInteres || null,
+          modelo_interes: modeloInteres || null,
+          mensaje: consulta || null,
         }),
       });
 
       if (!res.ok) {
-        let detail = "";
-        try {
-          const data = await res.json();
-          detail = data?.error || JSON.stringify(data);
-        } catch {
-          detail = await res.text();
-        }
-        setStatus("error");
-        setErrorMsg(
-          detail || "No se pudo enviar la consulta. Intentá de nuevo."
-        );
-        return;
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo enviar la consulta.");
       }
 
-      const { lead } = await res.json();
-
-      // Registrar evento de formulario enviado
-      fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "form_submit", leadId: lead?.id }),
-      }).catch(() => {});
-
       setStatus("ok");
+
+      // Limpio algunos campos importantes
       setNombre("");
       setEmail("");
-      setTelCodigo("");
-      setTelNumero("");
-      setProvincia("");
-      setLocalidad("");
-      setHorarioDesde("");
-      setHorarioHasta("");
-      setCanal("WhatsApp");
-      setComentario("");
-      setMarcaInteres("");
-      setModeloInteres("");
+      setCodArea("");
+      setTelefono("");
+      setConsulta("");
     } catch (err: any) {
-      console.error("Error enviando lead:", err);
+      console.error("Error al enviar lead:", err);
       setStatus("error");
-      setErrorMsg(
-        err?.message || "No se pudo enviar la consulta. Intentá de nuevo."
-      );
+      setErrorMsg(err?.message ?? "Ocurrió un error al enviar tu consulta.");
     } finally {
-      setStatus((prev) => (prev === "loading" ? "idle" : prev));
+      setTimeout(() => setStatus("idle"), 4000);
     }
-  }
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-4 text-sm text-slate-900"
+    >
+      {/* Nombre + Email */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Nombre y apellido *
           </label>
           <input
@@ -108,13 +84,12 @@ export default function LeadForm() {
             required
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
             placeholder="Ej: Juan Pérez"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
-
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Email *
           </label>
           <input
@@ -122,151 +97,179 @@ export default function LeadForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
             placeholder="Ej: nombre@correo.com"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-[0.7fr,1.3fr] md:grid-cols-[0.6fr,1.4fr] gap-3">
+      {/* Cód. área + Teléfono */}
+      <div className="grid grid-cols-[0.7fr_1.3fr] gap-3">
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
-            Cód. de área
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            Cód. de área *
           </label>
           <input
             type="text"
-            value={telCodigo}
-            onChange={(e) => setTelCodigo(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            inputMode="numeric"
+            maxLength={4}
+            required
+            value={codArea}
+            onChange={(e) => setCodArea(e.target.value)}
             placeholder="Ej: 011"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Teléfono / WhatsApp *
           </label>
           <input
             type="tel"
             required
-            value={telNumero}
-            onChange={(e) => setTelNumero(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
             placeholder="Ej: 1234 5678"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
       </div>
 
+      {/* Provincia / localidad */}
       <div>
-        <label className="block text-[12px] font-medium text-slate-700 mb-1">
-          Provincia / localidad
+        <label className="mb-1 block text-xs font-medium text-slate-600">
+          Provincia / localidad *
         </label>
         <input
           type="text"
-          value={provincia}
-          onChange={(e) => setProvincia(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+          required
+          value={provinciaLocalidad}
+          onChange={(e) => setProvinciaLocalidad(e.target.value)}
           placeholder="Ej: CABA, GBA Oeste, Córdoba capital..."
+          className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Horarios */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Horario desde
           </label>
-          <input
-            type="time"
+          <select
             value={horarioDesde}
             onChange={(e) => setHorarioDesde(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-          />
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          >
+            <option value="">Seleccionar</option>
+            <option value="09:00">09 hs</option>
+            <option value="10:00">10 hs</option>
+            <option value="11:00">11 hs</option>
+            <option value="12:00">12 hs</option>
+            <option value="15:00">15 hs</option>
+            <option value="16:00">16 hs</option>
+            <option value="17:00">17 hs</option>
+          </select>
         </div>
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Horario hasta
           </label>
-          <input
-            type="time"
+          <select
             value={horarioHasta}
             onChange={(e) => setHorarioHasta(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-          />
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          >
+            <option value="">Seleccionar</option>
+            <option value="13:00">13 hs</option>
+            <option value="14:00">14 hs</option>
+            <option value="18:00">18 hs</option>
+            <option value="19:00">19 hs</option>
+            <option value="20:00">20 hs</option>
+          </select>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Canal + Marca + Modelo */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-[12px] font-medium text-slate-700 mb-1">
+          <label className="mb-1 block text-xs font-medium text-slate-600">
             Preferís que te contacten por
           </label>
           <select
             value={canal}
             onChange={(e) => setCanal(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
             <option value="WhatsApp">WhatsApp</option>
-            <option value="Telefono">Teléfono</option>
-            <option value="Email">Email</option>
+            <option value="Teléfono">Teléfono</option>
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-[12px] font-medium text-slate-700 mb-1">
-              Marca de interés
-            </label>
-            <input
-              type="text"
-              value={marcaInteres}
-              onChange={(e) => setMarcaInteres(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-              placeholder="Ej: Volkswagen"
-            />
-          </div>
-          <div>
-            <label className="block text-[12px] font-medium text-slate-700 mb-1">
-              Modelo de interés
-            </label>
-            <input
-              type="text"
-              value={modeloInteres}
-              onChange={(e) => setModeloInteres(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
-              placeholder="Ej: Polo, T-Cross..."
-            />
-          </div>
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            Marca de interés
+          </label>
+          <select
+            value={marcaInteres}
+            onChange={(e) => setMarcaInteres(e.target.value)}
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          >
+            <option value="Volkswagen">Volkswagen</option>
+            <option value="Chevrolet">Chevrolet</option>
+            <option value="Fiat">Fiat</option>
+            <option value="Peugeot">Peugeot</option>
+            <option value="Renault">Renault</option>
+            <option value="Otra">Otra</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs font-medium text-slate-600">
+            Modelo de interés
+          </label>
+          <input
+            type="text"
+            value={modeloInteres}
+            onChange={(e) => setModeloInteres(e.target.value)}
+            placeholder="Ej: Polo, T-Cross, Nivus..."
+            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
         </div>
       </div>
 
+      {/* Consulta */}
       <div>
-        <label className="block text-[12px] font-medium text-slate-700 mb-1">
+        <label className="mb-1 block text-xs font-medium text-slate-600">
           Tu consulta
         </label>
         <textarea
-          value={comentario}
-          onChange={(e) => setComentario(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400 min-h-[70px]"
+          rows={3}
+          value={consulta}
+          onChange={(e) => setConsulta(e.target.value)}
           placeholder="Contanos brevemente qué estás buscando (0km, financiación, entrega estimada, etc.)."
+          className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
         />
       </div>
 
+      {/* Mensajes de estado */}
       {status === "ok" && (
-        <p className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
-          Listo. Recibimos tu consulta. Un asesor te va a contactar a la
-          brevedad según el horario indicado.
+        <p className="text-xs text-emerald-600">
+          ¡Gracias! Recibimos tu consulta. Un asesor te va a contactar a la
+          brevedad.
         </p>
       )}
-
       {status === "error" && (
-        <p className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-          {errorMsg}
+        <p className="text-xs text-red-600">
+          {errorMsg || "No se pudo enviar la consulta. Intentá nuevamente."}
         </p>
       )}
 
+      {/* Botón */}
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-full bg-sky-700 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-sky-600 transition disabled:opacity-70"
+        className="mt-1 inline-flex w-full items-center justify-center rounded-full bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(37,99,235,0.45)] hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
       >
         {status === "loading" ? "Enviando..." : "Enviar consulta"}
       </button>
