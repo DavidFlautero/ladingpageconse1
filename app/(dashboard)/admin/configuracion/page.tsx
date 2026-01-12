@@ -1,44 +1,130 @@
-export default function ConfiguracionPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-semibold">Configuración</h1>
+"use client";
 
-      <section className="bg-black/60 border border-gray-900 rounded-xl p-6 space-y-3">
-        <h2 className="text-sm font-medium">Datos básicos</h2>
-        <input
-          className="bg-black border border-gray-800 rounded-lg p-2 text-sm"
-          placeholder="Nombre comercial"
-        />
-        <input
-          className="bg-black border border-gray-800 rounded-lg p-2 text-sm"
-          placeholder="Email de contacto"
-        />
-        <button className="bg-blue-600 hover:bg-blue-500 rounded-full py-2 text-sm w-max px-4 mt-2">
-          Guardar (dummy)
+import { useState } from "react";
+
+export default function ConfigPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [nombre, setNombre] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+
+  async function subirFoto() {
+    if (!file) return alert("Seleccione una imagen");
+
+    const form = new FormData();
+    form.append("file", file);
+
+    const r = await fetch("/api/admin/upload", {
+      method: "POST",
+      body: form,
+    });
+
+    const data = await r.json();
+    if (!data.url) return alert("Error subiendo imagen");
+    return data.url;
+  }
+
+  async function guardarPerfil() {
+    let fotoUrl = null;
+    if (file) fotoUrl = await subirFoto();
+
+    const res = await fetch("/api/admin/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        foto: fotoUrl,
+        nombre,
+        email,
+        telefono,
+      }),
+    });
+
+    if (!res.ok) alert("Error guardando");
+  }
+
+  async function guardarWhatsapp() {
+    const res = await fetch("/api/settings/whatsapp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: whatsapp }),
+    });
+
+    if (!res.ok) alert("Error guardando número");
+  }
+
+  return (
+    <div className="space-y-10">
+      {/* PERFIL */}
+      <section className="bg-slate-950/50 border border-slate-800 p-5 rounded-xl">
+        <h2 className="text-lg font-semibold text-slate-100 mb-2">
+          Perfil del administrador
+        </h2>
+
+        <div className="flex items-center gap-6">
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="text-sm text-slate-300"
+          />
+
+          <div className="flex-1">
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              className="bg-slate-900 text-slate-200 px-3 py-2 rounded mb-2 w-full"
+            />
+
+            <input
+              type="text"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-slate-900 text-slate-200 px-3 py-2 rounded mb-2 w-full"
+            />
+
+            <input
+              type="text"
+              placeholder="Teléfono"
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              className="bg-slate-900 text-slate-200 px-3 py-2 rounded mb-2 w-full"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={guardarPerfil}
+          className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded"
+        >
+          Guardar perfil
         </button>
       </section>
 
-      <section className="bg-black/60 border border-gray-900 rounded-xl p-6 space-y-3">
-        <h2 className="text-sm font-medium flex items-center gap-2">
-          Integraciones avanzadas
-          <span className="text-[10px] px-2 py-1 border border-gray-700 rounded-full">
-            Pro
-          </span>
+      {/* WHATSAPP */}
+      <section className="bg-slate-950/50 border border-slate-800 p-5 rounded-xl">
+        <h2 className="text-lg font-semibold text-slate-100 mb-2">
+          WhatsApp principal
         </h2>
-        <p className="text-xs text-gray-500">
-          Integración con CRM externo, cuentas publicitarias y usuarios
-          adicionales del equipo. Disponible en la siguiente fase del sistema.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-gray-500">
-          <div className="border border-gray-800 rounded-lg p-3">
-            CRM externo (bloqueado)
-          </div>
-          <div className="border border-gray-800 rounded-lg p-3">
-            Cuentas de publicidad (bloqueado)
-          </div>
-          <div className="border border-gray-800 rounded-lg p-3">
-            Usuarios adicionales (bloqueado)
-          </div>
+
+        <div className="flex gap-4">
+          <input
+            type="text"
+            placeholder="54911XXXXXXX"
+            value={whatsapp}
+            onChange={(e) => setWhatsapp(e.target.value)}
+            className="bg-slate-900 text-slate-200 px-3 py-2 rounded w-full"
+          />
+
+          <button
+            onClick={guardarWhatsapp}
+            className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded"
+          >
+            Guardar
+          </button>
         </div>
       </section>
     </div>
