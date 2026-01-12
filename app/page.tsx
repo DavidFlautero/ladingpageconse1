@@ -99,7 +99,6 @@ export default async function LandingPage() {
 
             <div className="relative px-6 py-10 md:px-10 md:py-14 text-white">
               <div className="max-w-3xl space-y-5">
-
                 <p className="inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/15 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-100">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
                   Consulta de acceso a tu 0km
@@ -107,17 +106,17 @@ export default async function LandingPage() {
 
                 <h1 className="text-3xl md:text-4xl lg:text-[2.6rem] font-semibold leading-tight">
                   Consultá si podés acceder a tu{" "}
-                  <span className="text-sky-300">0km en cuotas</span> según tu perfil.
+                  <span className="text-sky-300">0km en cuotas</span> según tu
+                  perfil.
                 </h1>
 
                 <p className="max-w-xl text-[15px] text-slate-200">
-                  Dejá tus datos una sola vez y un asesor oficial te contacta con opciones
-                  de concesionarios autorizados. Sin costo, sin venta directa desde este sitio
-                  y sin compromiso de compra.
+                  Dejá tus datos una sola vez y un asesor oficial te contacta
+                  con opciones de concesionarios autorizados. Sin costo, sin
+                  venta directa desde este sitio y sin compromiso de compra.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
-
                   <a
                     href="#form"
                     className="px-7 py-3 rounded-full bg-sky-500 hover:bg-sky-400 text-sm font-medium text-white shadow-[0_18px_40px_rgba(56,189,248,0.55)] transition"
@@ -131,19 +130,22 @@ export default async function LandingPage() {
                     className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-medium text-white shadow-[0_18px_38px_rgba(37,211,102,0.55)] hover:bg-[#20bd5a] transition"
                   >
                     <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="h-4 w-4 fill-current">
-                        <path d="M20.52 3.48A11.8 11.8 0 0 0 12.01 0C5.73 0 .61 5.12.61 11.4c0 2.01.53 3.97 1.55 5.7L0 24l7.09-2.19a11.37 11.37 0 0 0 4.92 1.13h.01c6.28 0 11.4-5.12 11.4-11.4 0-3.05-1.19-5.91-3.4-8.06Z" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        className="h-4 w-4 fill-current"
+                      >
+                        <path d="M20.52 3.48A11.8 11.8 0 0 0 12.01 0C5.73 0 .61 5.12.61 11.4c0 2.01.53 3.97 1.55 5.7L0 24l7.09-2.19a11.37 11.37 0 0 0 4.92 1.13h.01c6.28 0 11.4-5.12 11.4-11.4 0-3.05-1.19-5.91-3.4-8.06ZM12.01 21.3c-1.57 0-3.1-.42-4.44-1.21l-.32-.19-4.21 1.3 1.37-4.09-.21-.33A9.3 9.3 0 0 1 2.3 11.4c0-5.35 4.35-9.7 9.71-9.7 2.59 0 5.02 1.01 6.85 2.85a9.58 9.58 0 0 1 2.84 6.86c0 5.35-4.35 9.7-9.69 9.7Zm5.32-7.04c-.29-.15-1.7-.84-1.96-.94-.26-.1-.45-.15-.64.15-.19.29-.74.94-.91 1.13-.17.19-.34.2-.63.05-.29-.15-1.22-.45-2.33-1.44-.86-.77-1.44-1.73-1.61-2.02-.17-.29-.02-.45.13-.6.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.64-1.55-.88-2.12-.23-.55-.47-.48-.64-.49h-.55c-.19 0-.51.07-.78.36-.26.29-1.02.99-1.02 2.42 0 1.43 1.04 2.81 1.19 3 .15.19 2.06 3.15 4.99 4.42.7.3 1.25.48 1.68.62.71.23 1.35.2 1.86.12.57-.08 1.7-.7 1.94-1.38.24-.68.24-1.26.17-1.38-.07-.12-.26-.19-.55-.34Z" />
                       </svg>
                     </span>
                     Hablar por WhatsApp
                   </Link>
 
                   <p className="text-[11px] text-slate-200 max-w-xs">
-                    Consulta sin costo. No impacta tu scoring. Te contactan solo por alternativas aplicables.
+                    Consulta sin costo. No impacta tu scoring. Te contactan solo
+                    por alternativas aplicables a tu perfil.
                   </p>
-
                 </div>
-
               </div>
             </div>
           </div>
@@ -153,22 +155,21 @@ export default async function LandingPage() {
       {/* AUTOS ALCANZADOS POR EL BENEFICIO */}
       <section id="marcas" className="px-6 md:px-10 lg:px-20 pb-10">
         <div className="max-w-5xl mx-auto rounded-3xl bg-[#f8f5ef] border border-slate-200/70 shadow-[0_16px_45px_rgba(15,23,42,0.15)] px-5 py-7 md:px-8 md:py-9">
-
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
             Autos alcanzados por el beneficio
           </h2>
-
           <p className="text-sm text-slate-600 mb-6 max-w-2xl">
-            Los modelos se cargan desde el panel interno y se muestran aquí automáticamente.
+            Los modelos se cargan desde el panel interno y se muestran aquí
+            automáticamente. Son referencias estimadas para motivar la consulta.
           </p>
 
           {sectionsConAutos.length === 0 ? (
             <p className="text-sm text-slate-500">
-              Próximamente vas a ver aquí los modelos destacados.
+              Próximamente vas a ver aquí los modelos destacados que cargues
+              desde el panel.
             </p>
           ) : (
             <div className="space-y-8">
-
               {sectionsConAutos.map((section) => (
                 <div key={section.id}>
                   <h3 className="text-base font-semibold text-slate-900 mb-3">
@@ -177,15 +178,16 @@ export default async function LandingPage() {
 
                   <div className="grid gap-4 md:grid-cols-3">
                     {section.vehicles.slice(0, 3).map((v) => (
-                      <article
+                      <a
                         key={v.id}
-                        className="rounded-2xl border border-slate-200 bg-white overflow-hidden flex flex-col"
+                        href="#form"
+                        className="rounded-2xl border border-slate-200 bg-white overflow-hidden flex flex-col hover:shadow-[0_16px_40px_rgba(15,23,42,0.20)] hover:-translate-y-0.5 transition"
                       >
                         {v.imagen_url && (
                           <div className="aspect-[4/3] w-full overflow-hidden">
                             <img
                               src={v.imagen_url}
-                              alt={v.title}
+                              alt={`${section.title} ${v.title}`}
                               className="w-full h-full object-cover"
                             />
                           </div>
@@ -193,11 +195,13 @@ export default async function LandingPage() {
 
                         <div className="p-4 flex flex-col gap-1">
                           <h4 className="text-sm font-semibold text-slate-900">
-                            {v.title}
+                            {section.title} {v.title}
                           </h4>
                           {v.cuota_desde != null && (
-                            <p className="text-xs text-slate-600">
-                              Cuota estimada desde{" "}
+                            <p className="text-sm text-slate-700">
+                              <span className="font-semibold">
+                                Cuotas desde{" "}
+                              </span>
                               <span className="font-semibold">
                                 {v.moneda === "ARS" ? "$" : ""}
                                 {new Intl.NumberFormat("es-AR").format(
@@ -207,28 +211,27 @@ export default async function LandingPage() {
                             </p>
                           )}
                         </div>
-                      </article>
+                      </a>
                     ))}
                   </div>
                 </div>
               ))}
-
             </div>
           )}
-
         </div>
       </section>
 
-      {/* FORMULARIO */}
+      {/* FORMULARIO PRINCIPAL */}
       <section id="form" className="px-6 md:px-10 lg:px-20 pb-14">
         <div className="max-w-5xl mx-auto rounded-3xl bg-white border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.18)] px-5 py-8 md:px-8 md:py-10">
-
           <div className="max-w-3xl mb-6">
             <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
               Completá tu consulta para evaluar acceso a cuotas y beneficios.
             </h2>
             <p className="text-sm text-slate-600">
-              Te contactará un asesor oficial según tu perfil, zona y vehículo disponible.
+              Un asesor oficial va a revisar tu perfil, zona y si tenés auto
+              usado para tomar llave por llave. Después te va a contactar por
+              WhatsApp o teléfono con las alternativas vigentes.
             </p>
           </div>
 
@@ -236,16 +239,19 @@ export default async function LandingPage() {
 
           <div className="mt-4 space-y-1 text-[11px] text-slate-600 max-w-3xl">
             <p>
-              La información puede variar según marca, modelo y concesionario. Las propuestas finales se acuerdan directamente con la concesionaria oficial.
+              La información que recibas puede variar según marca, modelo,
+              concesionario y condiciones del momento. Las propuestas finales se
+              acuerdan directamente con la concesionaria oficial.
             </p>
             <p className="text-[10px]">
-              PlanNacionalTu0km.com.ar es una plataforma de asesoría privada. No es un organismo estatal.
+              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No
+              pertenece al Estado Nacional ni a organismos oficiales. No
+              realizamos venta directa: solo derivamos consultas a
+              concesionarios autorizados.
             </p>
           </div>
-
         </div>
       </section>
-
     </main>
   );
 }

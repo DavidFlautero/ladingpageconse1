@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       title,
       cuotaDesde,
       moneda,
-      imagenUrl, // NUEVO: viene del panel cuando subís archivo
+      imagenUrl,
       imagen1,
       imagen2,
       imagen3,
@@ -77,12 +77,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // priorizamos la imagen principal nueva (imagenUrl) y mantenemos compatibilidad con imagen1/2/3
     const mainImage = imagenUrl || imagen1 || null;
     const secondImage = imagen2 || null;
     const thirdImage = imagen3 || null;
 
-    // mínimo 1 imagen
     if (!mainImage && !secondImage && !thirdImage) {
       return NextResponse.json(
         { message: "Debe haber al menos una imagen." },
@@ -120,10 +118,72 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ vehicle: data });
   }
 
+  // Actualizar vehículo (título / cuota / moneda)
+  if (body.type === "update_vehicle") {
+    const { id, title, cuotaDesde, moneda } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "id de vehículo requerido." },
+        { status: 400 }
+      );
+    }
+
+    const cleanTitle = (title || "").toString().trim();
+
+    const { data, error } = await supabaseAdmin
+      .from("vehicles")
+      .update({
+        title: cleanTitle || undefined,
+        cuota_desde:
+          cuotaDesde !== undefined && cuotaDesde !== null
+            ? Number(cuotaDesde)
+            : null,
+        moneda: moneda || "ARS",
+      })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("POST /api/vehicles (update_vehicle) error", error);
+      return NextResponse.json(
+        { message: "No se pudo actualizar el vehículo." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ vehicle: data });
+  }
+
+  // Eliminar vehículo
+  if (body.type === "delete_vehicle") {
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "id de vehículo requerido." },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabaseAdmin
+      .from("vehicles")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("POST /api/vehicles (delete_vehicle) error", error);
+      return NextResponse.json(
+        { message: "No se pudo eliminar el vehículo." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true });
+  }
+
   // Toggle visible / no visible de una sección
-  // Soporta tanto el tipo viejo como el nuevo:
-  // - type: "toggle_section_visibility", sectionId, visible
-  // - type: "toggle-section", id, visible
   if (
     body.type === "toggle_section_visibility" ||
     body.type === "toggle-section"
