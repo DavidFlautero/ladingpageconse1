@@ -162,14 +162,12 @@ export default async function LandingPage() {
             Autos alcanzados por el beneficio
           </h2>
           <p className="text-sm text-slate-600 mb-6 max-w-2xl">
-            Los modelos se cargan desde el panel interno y se muestran aquí
-            automáticamente. Son referencias estimadas para motivar la consulta.
+            
           </p>
 
           {sectionsConAutos.length === 0 ? (
             <p className="text-sm text-slate-500">
-              Próximamente vas a ver aquí los modelos destacados que cargues
-              desde el panel.
+          
             </p>
           ) : (
             <div className="space-y-8">
