@@ -2,11 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET() {
-  // leemos secciones + vehículos desde Supabase
   const { data, error } = await supabaseAdmin
     .from("vehicle_sections")
     .select(
-      "id,title,slug,order_index,vehicles:vehicles(id,title,cuota_desde,moneda,imagen_url,orden)"
+      "id, title, slug, order_index, visible, vehicles:vehicles(id, title, cuota_desde, moneda, imagen_url, imagen_url_2, imagen_url_3, orden)"
     )
     .order("order_index", { ascending: true })
     .order("orden", { foreignTable: "vehicles", ascending: true });
@@ -58,11 +57,20 @@ export async function POST(req: NextRequest) {
 
   // Crear vehículo
   if (body.type === "vehicle") {
-    const { sectionId, title, cuotaDesde, moneda, imagenUrl } = body;
+    const { sectionId, title, cuotaDesde, moneda, imagen1, imagen2, imagen3 } =
+      body;
 
     if (!sectionId || !title || !String(title).trim()) {
       return NextResponse.json(
         { message: "Faltan datos para crear el vehículo." },
+        { status: 400 }
+      );
+    }
+
+    // mínimo 1 imagen
+    if (!imagen1 && !imagen2 && !imagen3) {
+      return NextResponse.json(
+        { message: "Debe haber al menos una imagen." },
         { status: 400 }
       );
     }
@@ -78,7 +86,9 @@ export async function POST(req: NextRequest) {
               ? Number(cuotaDesde)
               : null,
           moneda: moneda || "ARS",
-          imagen_url: imagenUrl || null,
+          imagen_url: imagen1 || null,
+          imagen_url_2: imagen2 || null,
+          imagen_url_3: imagen3 || null,
         },
       ])
       .select()
@@ -93,6 +103,34 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ vehicle: data });
+  }
+
+  // Toggle visible / no visible de una sección
+  if (body.type === "toggle_section_visibility") {
+    const { sectionId, visible } = body;
+    if (!sectionId) {
+      return NextResponse.json(
+        { message: "sectionId requerido." },
+        { status: 400 }
+      );
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("vehicle_sections")
+      .update({ visible })
+      .eq("id", sectionId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("POST /api/vehicles (toggle) error", error);
+      return NextResponse.json(
+        { message: "No se pudo actualizar la sección." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ section: data });
   }
 
   return NextResponse.json({ message: "Tipo no soportado." }, { status: 400 });
