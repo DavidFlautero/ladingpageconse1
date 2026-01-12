@@ -1,11 +1,11 @@
 import Link from "next/link";
 import Header from "@/components/layout/Header";
 import LeadForm from "@/components/landing/LeadForm";
-import VehiclesGrid from "@/components/landing/VehiclesGrid";
 import AnnouncementBar from "@/components/landing/AnnouncementBar";
 import EntryModal from "@/components/landing/EntryModal";
 import FloatingActions from "@/components/landing/FloatingActions";
 import { getWhatsappNumber } from "@/lib/config";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 function buildWhatsAppUrl(rawNumber?: string | null) {
   const fallback = "5491112345678";
@@ -17,12 +17,67 @@ function buildWhatsAppUrl(rawNumber?: string | null) {
   return `https://wa.me/${clean}`;
 }
 
+type Vehicle = {
+  id: number;
+  title: string;
+  cuota_desde: number | null;
+  moneda: string | null;
+  imagen_url: string | null;
+  imagen_url_2: string | null;
+  imagen_url_3: string | null;
+};
+
+type Section = {
+  id: number;
+  title: string;
+  slug: string | null;
+  order_index: number | null;
+  visible: boolean;
+  vehicles: Vehicle[];
+};
+
+async function getVehicleSectionsForLanding(): Promise<Section[]> {
+  const { data, error } = await supabaseAdmin
+    .from("vehicle_sections")
+    .select(
+      `
+      id,
+      title,
+      slug,
+      order_index,
+      visible,
+      vehicles:vehicles (
+        id,
+        title,
+        cuota_desde,
+        moneda,
+        imagen_url,
+        imagen_url_2,
+        imagen_url_3,
+        orden
+      )
+    `
+    )
+    .eq("visible", true)
+    .order("order_index", { ascending: true })
+    .order("orden", { foreignTable: "vehicles", ascending: true });
+
+  if (error) {
+    console.error("Error cargando vehicle_sections para landing:", error);
+    return [];
+  }
+
+  return (data as Section[]) ?? [];
+}
+
 export default async function LandingPage() {
   const whatsappNumber = await getWhatsappNumber();
   const whatsappUrl = buildWhatsAppUrl(whatsappNumber);
 
-  // Más adelante vendrá desde Supabase
-  const vehicles: any[] = [];
+  const sections = await getVehicleSectionsForLanding();
+  const sectionsConAutos = sections.filter(
+    (s) => s.vehicles && s.vehicles.length > 0
+  );
 
   return (
     <main className="min-h-screen bg-[#f3f1eb] text-slate-900">
@@ -50,13 +105,14 @@ export default async function LandingPage() {
 
                 <h1 className="text-3xl md:text-4xl lg:text-[2.6rem] font-semibold leading-tight">
                   Consultá si podés acceder a tu{" "}
-                  <span className="text-sky-300">0km en cuotas</span> según tu perfil.
+                  <span className="text-sky-300">0km en cuotas</span> según tu
+                  perfil.
                 </h1>
 
                 <p className="max-w-xl text-[15px] text-slate-200">
-                  Dejá tus datos una sola vez y un asesor oficial te contacta con opciones
-                  de concesionarios autorizados. Sin costo, sin venta directa desde este
-                  sitio y sin compromiso de compra.
+                  Dejá tus datos una sola vez y un asesor oficial te contacta
+                  con opciones de concesionarios autorizados. Sin costo, sin
+                  venta directa desde este sitio y sin compromiso de compra.
                 </p>
 
                 <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -86,8 +142,8 @@ export default async function LandingPage() {
                   </Link>
 
                   <p className="text-[11px] text-slate-200 max-w-xs">
-                    Consulta sin costo. No impacta tu scoring. Te contactan solo por las
-                    alternativas que aplican a tu perfil.
+                    Consulta sin costo. No impacta tu scoring. Te contactan solo
+                    por las alternativas que aplican a tu perfil.
                   </p>
                 </div>
               </div>
@@ -103,12 +159,64 @@ export default async function LandingPage() {
             Autos alcanzados por el beneficio
           </h2>
           <p className="text-sm text-slate-600 mb-6 max-w-2xl">
-            Desde el panel interno vas a poder cargar los modelos de referencia, las cuotas
-            estimadas y hasta 4 fotos por vehículo. En la landing se muestran solo algunos
-            ejemplos para motivar la consulta (hasta 9 vehículos destacados).
+            Desde el panel interno vas a poder cargar los modelos de referencia,
+            las cuotas estimadas y hasta 4 fotos por vehículo. En la landing se
+            muestran solo algunos ejemplos para motivar la consulta (hasta 9
+            vehículos destacados).
           </p>
 
-          <VehiclesGrid vehicles={vehicles} />
+          {sectionsConAutos.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Próximamente vas a ver aquí los modelos destacados que cargues
+              desde el panel.
+            </p>
+          ) : (
+            <div className="space-y-8">
+              {sectionsConAutos.map((section) => (
+                <div key={section.id}>
+                  <h3 className="text-base font-semibold text-slate-900 mb-3">
+                    {section.title}
+                  </h3>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {section.vehicles.slice(0, 3).map((v) => (
+                      <article
+                        key={v.id}
+                        className="rounded-2xl border border-slate-200 bg-white overflow-hidden flex flex-col"
+                      >
+                        {v.imagen_url && (
+                          <div className="aspect-[4/3] w-full overflow-hidden">
+                            <img
+                              src={v.imagen_url}
+                              alt={v.title}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+
+                        <div className="p-4 flex flex-col gap-1">
+                          <h4 className="text-sm font-semibold text-slate-900">
+                            {v.title}
+                          </h4>
+                          {v.cuota_desde != null && (
+                            <p className="text-xs text-slate-600">
+                              Cuota estimada desde{" "}
+                              <span className="font-semibold">
+                                {v.moneda === "ARS" ? "$" : ""}
+                                {new Intl.NumberFormat("es-AR").format(
+                                  Number(v.cuota_desde)
+                                )}
+                              </span>
+                            </p>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -120,9 +228,9 @@ export default async function LandingPage() {
               Completá tu consulta para evaluar acceso a cuotas y beneficios.
             </h2>
             <p className="text-sm text-slate-600">
-              Un asesor oficial va a revisar tu perfil, zona y si tenés auto usado para
-              tomar llave por llave. Después te va a contactar por WhatsApp o teléfono con
-              las alternativas vigentes.
+              Un asesor oficial va a revisar tu perfil, zona y si tenés auto
+              usado para tomar llave por llave. Después te va a contactar por
+              WhatsApp o teléfono con las alternativas vigentes.
             </p>
           </div>
 
@@ -130,20 +238,19 @@ export default async function LandingPage() {
 
           <div className="mt-4 space-y-1 text-[11px] text-slate-600 max-w-3xl">
             <p>
-              La información que recibas puede variar según marca, modelo, concesionario y
-              condiciones del momento. Las propuestas finales se acuerdan directamente con
-              la concesionaria oficial.
+              La información que recibas puede variar según marca, modelo,
+              concesionario y condiciones del momento. Las propuestas finales se
+              acuerdan directamente con la concesionaria oficial.
             </p>
             <p className="text-[10px]">
-              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No pertenece
-              al Estado Nacional, Gobierno ni organismos oficiales. No realizamos venta
-              directa: solo derivamos consultas a concesionarios autorizados.
+              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No
+              pertenece al Estado Nacional, Gobierno ni organismos oficiales. No
+              realizamos venta directa: solo derivamos consultas a
+              concesionarios autorizados.
             </p>
           </div>
         </div>
-		
       </section>
     </main>
   );
 }
-

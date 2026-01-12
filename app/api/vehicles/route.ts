@@ -19,7 +19,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  const body: any = await req.json();
 
   // Crear sección / marca
   if (body.type === "section") {
@@ -57,18 +57,33 @@ export async function POST(req: NextRequest) {
 
   // Crear vehículo
   if (body.type === "vehicle") {
-    const { sectionId, title, cuotaDesde, moneda, imagen1, imagen2, imagen3 } =
-      body;
+    const {
+      sectionId,
+      title,
+      cuotaDesde,
+      moneda,
+      imagenUrl, // NUEVO: viene del panel cuando subís archivo
+      imagen1,
+      imagen2,
+      imagen3,
+    } = body;
 
-    if (!sectionId || !title || !String(title).trim()) {
+    const cleanTitle = (title || "").toString().trim();
+
+    if (!sectionId || !cleanTitle) {
       return NextResponse.json(
         { message: "Faltan datos para crear el vehículo." },
         { status: 400 }
       );
     }
 
+    // priorizamos la imagen principal nueva (imagenUrl) y mantenemos compatibilidad con imagen1/2/3
+    const mainImage = imagenUrl || imagen1 || null;
+    const secondImage = imagen2 || null;
+    const thirdImage = imagen3 || null;
+
     // mínimo 1 imagen
-    if (!imagen1 && !imagen2 && !imagen3) {
+    if (!mainImage && !secondImage && !thirdImage) {
       return NextResponse.json(
         { message: "Debe haber al menos una imagen." },
         { status: 400 }
@@ -80,15 +95,15 @@ export async function POST(req: NextRequest) {
       .insert([
         {
           section_id: sectionId,
-          title: String(title).trim(),
+          title: cleanTitle,
           cuota_desde:
             cuotaDesde !== undefined && cuotaDesde !== null
               ? Number(cuotaDesde)
               : null,
           moneda: moneda || "ARS",
-          imagen_url: imagen1 || null,
-          imagen_url_2: imagen2 || null,
-          imagen_url_3: imagen3 || null,
+          imagen_url: mainImage,
+          imagen_url_2: secondImage,
+          imagen_url_3: thirdImage,
         },
       ])
       .select()
@@ -106,8 +121,16 @@ export async function POST(req: NextRequest) {
   }
 
   // Toggle visible / no visible de una sección
-  if (body.type === "toggle_section_visibility") {
-    const { sectionId, visible } = body;
+  // Soporta tanto el tipo viejo como el nuevo:
+  // - type: "toggle_section_visibility", sectionId, visible
+  // - type: "toggle-section", id, visible
+  if (
+    body.type === "toggle_section_visibility" ||
+    body.type === "toggle-section"
+  ) {
+    const sectionId = body.sectionId ?? body.id;
+    const { visible } = body;
+
     if (!sectionId) {
       return NextResponse.json(
         { message: "sectionId requerido." },
