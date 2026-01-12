@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req: Request) {
   try {
@@ -15,33 +14,27 @@ export async function POST(req: Request) {
     const email = String(body.email).trim();
     const password = String(body.password);
 
-    // Validamos contra Supabase Auth usando el cliente de servidor
-    const { data, error } = await supabaseAdmin.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (error || !data?.session) {
+    if (!adminEmail || !adminPassword) {
+      console.error("ADMIN_EMAIL o ADMIN_PASSWORD no configurados.");
       return NextResponse.json(
-        {
-          error:
-            error?.message ||
-            "Credenciales inválidas o sesión no generada.",
-        },
+        { error: "Configuración de admin incompleta en el servidor." },
+        { status: 500 }
+      );
+    }
+
+    if (email !== adminEmail || password !== adminPassword) {
+      return NextResponse.json(
+        { error: "Credenciales inválidas." },
         { status: 401 }
       );
     }
 
-    // Si quisieras una cookie propia, acá la podrías setear.
-    // Para MVP solo devolvemos OK.
+    // Si quisieras setear cookie propia, aquí.
     return NextResponse.json(
-      {
-        ok: true,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-        },
-      },
+      { ok: true, user: { email: adminEmail } },
       { status: 200 }
     );
   } catch (err: any) {

@@ -37,15 +37,14 @@ export default function LoginPage() {
         }
 
         setErrorMsg(
-          `Error al iniciar sesión (${
-            res.status
-          }): ${detail || "credenciales inválidas"}`
+          `Error al iniciar sesión (${res.status}): ${
+            detail || "credenciales inválidas"
+          }`
         );
         setLoading(false);
         return;
       }
 
-      // OK → redirigimos al panel
       const data = await res.json();
       console.log("LOGIN API OK:", data);
       router.push("/admin");
