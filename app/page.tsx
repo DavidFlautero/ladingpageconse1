@@ -7,6 +7,9 @@ import FloatingActions from "@/components/landing/FloatingActions";
 import { getWhatsappNumber } from "@/lib/config";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+// Fuerza que esta página sea dinámica (sin HTML cacheado)
+export const dynamic = "force-dynamic";
+
 function buildWhatsAppUrl(rawNumber?: string | null) {
   const fallback = "5491112345678";
   const clean =
