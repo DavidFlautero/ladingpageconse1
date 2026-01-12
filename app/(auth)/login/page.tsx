@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -117,9 +118,17 @@ export default function LoginPage() {
             {loading ? "Ingresando..." : "Para entrar"}
           </button>
 
-          <p className="mt-3 text-[11px] text-slate-500 text-center">
-            Si no tenés usuario, solicitá acceso al administrador del sistema.
-          </p>
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-[11px] text-slate-500">
+              Si no tenés usuario, solicitá acceso al administrador.
+            </p>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-medium text-sky-700 hover:text-sky-600"
+            >
+              Olvidé mi contraseña
+            </Link>
+          </div>
         </form>
       </div>
     </main>
