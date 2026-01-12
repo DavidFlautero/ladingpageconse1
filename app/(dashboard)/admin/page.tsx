@@ -128,13 +128,13 @@ export default function AdminDashboardPage() {
                     {lead.email}
                     <div className="text-[11px] text-slate-500">
                       {lead.telefono_codigo
-                        ? \`(\${lead.telefono_codigo}) \${lead.telefono_numero}\`
+                        ? `(${lead.telefono_codigo}) ${lead.telefono_numero}`
                         : lead.telefono_numero}
                     </div>
                   </td>
                   <td className="px-4 py-2 text-slate-300">
                     {lead.localidad || "-"}
-                    {lead.provincia ? \` · \${lead.provincia}\` : ""}
+                    {lead.provincia ? ` · ${lead.provincia}` : ""}
                   </td>
                   <td className="px-4 py-2 text-slate-300">
                     {lead.canal_contacto || "-"}
