@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function GET() {
-  const supabase = createClient();
-
-  const { data, error } = await supabase
+  // leemos secciones + vehículos desde Supabase
+  const { data, error } = await supabaseAdmin
     .from("vehicle_sections")
     .select(
       "id,title,slug,order_index,vehicles:vehicles(id,title,cuota_desde,moneda,imagen_url,orden)"
@@ -21,7 +20,6 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = createClient();
   const body = await req.json();
 
   // Crear sección / marca
@@ -36,10 +34,12 @@ export async function POST(req: NextRequest) {
 
     const slug = title
       .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "");
+      .replace(/^-+|-+$/g, "");
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("vehicle_sections")
       .insert([{ title, slug }])
       .select()
@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("vehicles")
       .insert([
         {
