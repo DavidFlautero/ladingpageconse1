@@ -312,13 +312,6 @@ export default function ConfiguracionPage() {
     }
   }
 
-  const selectedSection =
-    typeof selectedSectionId === "number"
-      ? sections.find((s) => s.id === selectedSectionId) || null
-      : null;
-
-  const selectedVehicles = selectedSection?.vehicles ?? [];
-
   return (
     <div className="space-y-8">
       <section className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6">
@@ -326,10 +319,8 @@ export default function ConfiguracionPage() {
           Configuración de autos en la landing
         </h1>
         <p className="text-sm text-slate-400 mb-4">
-          Creá secciones por marca (Chevrolet, Volkswagen, etc.) y cargá los
-          autos que se van a mostrar de a tres por fila en la landing. Podés
-          decidir qué marcas se muestran u ocultan y administrar los modelos ya
-          cargados.
+          Creá secciones por marca, cargá autos con imágenes y cuotas y
+          administrá los modelos que hoy se muestran en la landing.
         </p>
 
         {/* Secciones creadas + toggle Visible */}
@@ -475,114 +466,132 @@ export default function ConfiguracionPage() {
           </div>
         </form>
 
-        {/* Listado de autos de la sección seleccionada */}
-        {selectedSection && (
-          <div className="mt-8 border-t border-slate-800 pt-6">
-            <h3 className="text-sm font-semibold text-slate-100 mb-3">
-              Autos cargados en {selectedSection.title}
-            </h3>
+        {/* AUTOS CARGADOS POR SECCIÓN */}
+        <div className="mt-8 border-t border-slate-800 pt-6">
+          <h3 className="text-sm font-semibold text-slate-100 mb-3">
+            Autos cargados por sección
+          </h3>
 
-            {selectedVehicles.length === 0 ? (
-              <p className="text-xs text-slate-400">
-                Todavía no cargaste autos para esta sección.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {selectedVehicles.map((v) => {
-                  const isEditing = editingVehicleId === v.id;
-                  return (
-                    <div
-                      key={v.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2"
-                    >
-                      <div className="flex items-center gap-3">
-                        {v.imagen_url && (
-                          <img
-                            src={v.imagen_url}
-                            alt={v.title}
-                            className="h-10 w-16 rounded-lg object-cover border border-slate-700"
-                          />
-                        )}
-                        <div className="space-y-0.5">
-                          {isEditing ? (
-                            <>
-                              <input
-                                className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
-                                value={editTitle}
-                                onChange={(e) =>
-                                  setEditTitle(e.target.value)
-                                }
-                              />
-                              <input
-                                className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
-                                value={editCuota}
-                                onChange={(e) =>
-                                  setEditCuota(e.target.value)
-                                }
-                                placeholder="Cuota desde (ej: 250.000)"
-                              />
-                            </>
-                          ) : (
-                            <>
-                              <p className="text-xs font-semibold text-slate-100">
-                                {v.title}
-                              </p>
-                              <p className="text-[11px] text-slate-400">
-                                Cuota desde{" "}
-                                <span className="font-semibold">
-                                  {v.moneda === "ARS" ? "$" : ""}
-                                  {formatCuota(v.cuota_desde)}
-                                </span>
-                              </p>
-                            </>
-                          )}
-                        </div>
-                      </div>
+          {sections.every((s) => s.vehicles.length === 0) ? (
+            <p className="text-xs text-slate-400">
+              Todavía no cargaste autos en ninguna sección.
+            </p>
+          ) : (
+            <div className="space-y-6">
+              {sections.map((section) => (
+                <div key={section.id}>
+                  <p className="text-xs font-semibold text-slate-200 mb-2">
+                    {section.title}
+                  </p>
 
-                      <div className="flex items-center gap-2">
-                        {isEditing ? (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => handleSaveVehicleEdit(v.id)}
-                              className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-[11px] font-medium text-white"
-                            >
-                              Guardar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={cancelEditVehicle}
-                              className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
-                            >
-                              Cancelar
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => startEditVehicle(v)}
-                              className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
-                            >
-                              Editar
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteVehicle(v.id)}
-                              className="px-2 py-1 rounded-md bg-red-600 hover:bg-red-500 text-[11px] font-medium text-white"
-                            >
-                              Eliminar
-                            </button>
-                          </>
-                        )}
-                      </div>
+                  {section.vehicles.length === 0 ? (
+                    <p className="text-[11px] text-slate-500">
+                      Sin autos cargados en esta sección.
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {section.vehicles.map((v) => {
+                        const isEditing = editingVehicleId === v.id;
+                        return (
+                          <div
+                            key={v.id}
+                            className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2"
+                          >
+                            <div className="flex items-center gap-3">
+                              {v.imagen_url && (
+                                <img
+                                  src={v.imagen_url}
+                                  alt={v.title}
+                                  className="h-10 w-16 rounded-lg object-cover border border-slate-700"
+                                />
+                              )}
+                              <div className="space-y-0.5">
+                                {isEditing ? (
+                                  <>
+                                    <input
+                                      className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
+                                      value={editTitle}
+                                      onChange={(e) =>
+                                        setEditTitle(e.target.value)
+                                      }
+                                    />
+                                    <input
+                                      className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
+                                      value={editCuota}
+                                      onChange={(e) =>
+                                        setEditCuota(e.target.value)
+                                      }
+                                      placeholder="Cuota desde (ej: 250.000)"
+                                    />
+                                  </>
+                                ) : (
+                                  <>
+                                    <p className="text-xs font-semibold text-slate-100">
+                                      {v.title}
+                                    </p>
+                                    <p className="text-[11px] text-slate-400">
+                                      Cuota desde{" "}
+                                      <span className="font-semibold">
+                                        {v.moneda === "ARS" ? "$" : ""}
+                                        {formatCuota(v.cuota_desde)}
+                                      </span>
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleSaveVehicleEdit(v.id)
+                                    }
+                                    className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-[11px] font-medium text-white"
+                                  >
+                                    Guardar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={cancelEditVehicle}
+                                    className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
+                                  >
+                                    Cancelar
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => startEditVehicle(v)}
+                                    className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
+                                  >
+                                    Editar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleDeleteVehicle(v.id)
+                                    }
+                                    className="px-2 py-1 rounded-md bg-red-600 hover:bg-red-500 text-[11px] font-medium text-white"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Mensajes de estado */}
         {statusMessage && (

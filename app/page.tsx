@@ -143,7 +143,7 @@ export default async function LandingPage() {
 
                   <p className="text-[11px] text-slate-200 max-w-xs">
                     Consulta sin costo. No impacta tu scoring. Te contactan solo
-                    por alternativas aplicables a tu perfil.
+                    por las alternativas que aplican a tu perfil.
                   </p>
                 </div>
               </div>
@@ -177,7 +177,7 @@ export default async function LandingPage() {
                   </h3>
 
                   <div className="grid gap-4 md:grid-cols-3">
-                    {section.vehicles.slice(0, 3).map((v) => (
+                    {section.vehicles.map((v) => (
                       <a
                         key={v.id}
                         href="#form"
@@ -245,7 +245,7 @@ export default async function LandingPage() {
             </p>
             <p className="text-[10px]">
               PlanNacionalTu0km.com.ar es una plataforma privada de asesoría. No
-              pertenece al Estado Nacional ni a organismos oficiales. No
+              pertenece al Estado Nacional, Gobierno ni organismos oficiales. No
               realizamos venta directa: solo derivamos consultas a
               concesionarios autorizados.
             </p>
