@@ -7,6 +7,13 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Debug rápido: asegurarnos de que el frontend ve las env vars
+console.log("SUPABASE_URL (login):", supabaseUrl);
+console.log(
+  "SUPABASE_KEY definida?:",
+  typeof supabaseAnonKey === "string" && supabaseAnonKey.length > 0
+);
+
 // Cliente público para login
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -31,13 +38,11 @@ export default function LoginPage() {
       console.log("SUPABASE LOGIN RESPONSE:", { data, error });
 
       if (error) {
-        // Mostramos el mensaje completo para ver qué está pasando
         setErrorMsg(`Error al iniciar sesión: ${error.message}`);
         setLoading(false);
         return;
       }
 
-      // Login OK → redirigimos al panel
       router.push("/admin");
     } catch (err: any) {
       console.error("Error login (catch):", err);
