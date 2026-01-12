@@ -1,88 +1,57 @@
 "use client";
 
 import { useState } from "react";
-import { sendResetPasswordEmail } from "@/utils/auth/resetPassword";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
-    "idle"
-  );
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("loading");
-    setErrorMsg(null);
-
-    try {
-      await sendResetPasswordEmail(email);
-      setStatus("ok");
-    } catch (err: any) {
-      console.error("Error al enviar resetPassword:", err);
-      setStatus("error");
-      setErrorMsg(err?.message ?? "No se pudo enviar el correo.");
-    }
+    // Por ahora no llamamos a Supabase:
+    // solo mostramos un mensaje y listo.
+    setSent(true);
   };
 
   return (
-    <main className="min-h-screen bg-[#f3f1eb] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] p-6 md:p-8">
-        <div className="mb-6 text-center">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-2">
-            Recuperar acceso
-          </p>
-          <h1 className="text-xl font-semibold text-slate-900">
-            Olvidé mi contraseña
-          </h1>
-          <p className="text-[13px] text-slate-600 mt-1">
-            Ingresá el correo con el que accedés al panel interno. Te vamos a
-            enviar un link para restablecer tu contraseña.
-          </p>
-        </div>
+    <main className="min-h-screen flex items-center justify-center bg-slate-900 text-slate-50 px-4">
+      <div className="w-full max-w-md bg-slate-950/70 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+        <h1 className="text-xl font-semibold">
+          Recuperar acceso
+        </h1>
+        <p className="text-sm text-slate-300">
+          Si necesitás recuperar tu acceso, ingresá tu email y el administrador
+          del sistema podrá asistirte manualmente.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-[12px] font-medium text-slate-700 mb-1">
-              Correo electrónico
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Email de acceso
             </label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-500"
               placeholder="admin@tu0km.com"
             />
           </div>
 
-          {status === "ok" && (
-            <p className="text-[12px] text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">
-              Te enviamos un correo para restablecer tu contraseña. Revisá
-              también la carpeta de spam o promociones.
-            </p>
-          )}
-
-          {status === "error" && (
-            <p className="text-[12px] text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-              Error: {errorMsg}
+          {sent && (
+            <p className="text-xs text-emerald-400 bg-emerald-900/30 border border-emerald-700/60 rounded-lg px-3 py-2">
+              Gracias. Registramos tu solicitud. Contactá al administrador para
+              completar el proceso.
             </p>
           )}
 
           <button
             type="submit"
-            disabled={status === "loading"}
-            className="w-full rounded-full bg-sky-700 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-sky-600 transition disabled:opacity-70"
+            className="w-full rounded-full bg-sky-600 hover:bg-sky-500 text-sm font-medium text-white py-2.5 transition"
           >
-            {status === "loading"
-              ? "Enviando link..."
-              : "Enviar link de recuperación"}
+            Enviar solicitud
           </button>
-
-          <p className="mt-3 text-[11px] text-slate-500 text-center">
-            Si no recibís el correo en unos minutos, verificá que el email sea
-            correcto o consultá con el administrador del sistema.
-          </p>
         </form>
       </div>
     </main>
