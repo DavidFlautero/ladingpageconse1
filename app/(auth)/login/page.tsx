@@ -3,9 +3,6 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -19,15 +16,10 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      const endpoint = `${supabaseUrl.replace(/\/$/, "")}/auth/v1/token?grant_type=password`;
-
-      console.log("AUTH_ENDPOINT:", endpoint);
-
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          apikey: supabaseAnonKey,
         },
         body: JSON.stringify({
           email: email.trim(),
@@ -35,36 +27,35 @@ export default function LoginPage() {
         }),
       });
 
-      console.log("AUTH_STATUS:", res.status);
-
       if (!res.ok) {
         let detail = "";
         try {
           const data = await res.json();
-          detail = data?.error_description || data?.message || JSON.stringify(data);
+          detail = data?.error || JSON.stringify(data);
         } catch {
           detail = await res.text();
         }
 
         setErrorMsg(
-          `Error al iniciar sesión (status ${res.status}): ${
-            detail || "credenciales inválidas o error en el servidor"
-          }`
+          `Error al iniciar sesión (${
+            res.status
+          }): ${detail || "credenciales inválidas"}`
         );
         setLoading(false);
         return;
       }
 
-      // Si llega aquí, Supabase devolvió un token válido
+      // OK → redirigimos al panel
       const data = await res.json();
-      console.log("AUTH_SUCCESS_PAYLOAD:", data);
-
-      // TODO: acá podrías guardar el access_token en cookies/localStorage
-      // por ahora, simplemente redirigimos al panel
+      console.log("LOGIN API OK:", data);
       router.push("/admin");
     } catch (err: any) {
       console.error("Error login (catch):", err);
-      setErrorMsg(`Error de red: ${err?.message || "No se pudo conectar con Supabase"}`);
+      setErrorMsg(
+        `Error de red llamando al servidor: ${
+          err?.message || "No se pudo conectar."
+        }`
+      );
       setLoading(false);
     }
   }
@@ -130,21 +121,6 @@ export default function LoginPage() {
           <p className="mt-3 text-[11px] text-slate-500 text-center">
             Si no tenés usuario, solicitá acceso al administrador del sistema.
           </p>
-
-          {/* DEBUG TEMPORAL: podés borrar esto después */}
-          <div className="mt-4 border-t border-slate-200 pt-2">
-            <p className="text-[10px] text-slate-500">
-              DEBUG URL: <span className="font-mono">{supabaseUrl}</span>
-            </p>
-            <p className="text-[10px] text-slate-500">
-              DEBUG KEY prefix:{" "}
-              <span className="font-mono">
-                {typeof supabaseAnonKey === "string"
-                  ? supabaseAnonKey.slice(0, 15)
-                  : "no-key"}
-              </span>
-            </p>
-          </div>
         </form>
       </div>
     </main>
