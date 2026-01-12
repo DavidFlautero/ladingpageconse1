@@ -58,11 +58,7 @@ export default function DashboardPage() {
         <Card title="Leads" value={metrics.leads ?? 0} />
         <Card
           title="Tasa de conversión"
-          value={
-            (metrics.conversion ?? 0).toFixed
-              ? `${metrics.conversion.toFixed(1)}%`
-              : "0.0%"
-          }
+          value={`${(metrics.conversion ?? 0).toFixed(1)}%`}
         />
       </section>
 
