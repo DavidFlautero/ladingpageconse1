@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 type Section = {
   id: number;
@@ -14,6 +19,7 @@ export default function ConfiguracionPage() {
   const [vehicleTitle, setVehicleTitle] = useState("");
   const [vehicleCuota, setVehicleCuota] = useState("");
   const [vehicleImage, setVehicleImage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   async function loadSections() {
     try {
@@ -31,7 +37,7 @@ export default function ConfiguracionPage() {
     loadSections();
   }, []);
 
-  async function handleCreateSection(e: React.FormEvent) {
+  async function handleCreateSection(e: FormEvent) {
     e.preventDefault();
     const title = newSectionTitle.trim();
     if (!title) return;
@@ -51,7 +57,43 @@ export default function ConfiguracionPage() {
     await loadSections();
   }
 
-  async function handleCreateVehicle(e: React.FormEvent) {
+  async function handleVehicleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploadingImage(true);
+
+      const ext = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}.${ext}`;
+      const filePath = `autos/${fileName}`; // carpeta interna en el bucket
+
+      const { error: uploadError } = await supabase.storage
+        .from("vehicles") // nombre del bucket
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error(uploadError);
+        alert("Error al subir la imagen");
+        return;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("vehicles").getPublicUrl(filePath);
+
+      setVehicleImage(publicUrl);
+    } catch (err) {
+      console.error(err);
+      alert("Error inesperado al subir la imagen");
+    } finally {
+      setUploadingImage(false);
+    }
+  }
+
+  async function handleCreateVehicle(e: FormEvent) {
     e.preventDefault();
 
     if (!selectedSectionId || !vehicleTitle.trim()) return;
@@ -67,7 +109,7 @@ export default function ConfiguracionPage() {
           ? Number(vehicleCuota.replace(".", "").replace(",", "."))
           : null,
         moneda: "ARS",
-        imagenUrl: vehicleImage || null,
+        imagenUrl: vehicleImage || null, // ahora viene del upload
       }),
     });
 
@@ -172,21 +214,31 @@ export default function ConfiguracionPage() {
 
           <div className="md:col-span-1">
             <label className="block text-xs font-medium text-slate-300 mb-1">
-              URL de imagen (opcional)
+              Imagen principal
             </label>
             <input
-              type="text"
-              value={vehicleImage}
-              onChange={(e) => setVehicleImage(e.target.value)}
-              placeholder="https://..."
-              className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-50"
+              type="file"
+              accept="image/*"
+              onChange={handleVehicleImageChange}
+              className="w-full text-sm text-slate-50"
             />
+            {uploadingImage && (
+              <p className="text-xs text-slate-400 mt-1">
+                Subiendo imagen...
+              </p>
+            )}
+            {!uploadingImage && vehicleImage && (
+              <p className="text-xs text-emerald-400 mt-1">
+                Imagen cargada correctamente.
+              </p>
+            )}
           </div>
 
           <div className="md:col-span-4">
             <button
               type="submit"
-              className="mt-1 inline-flex px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium text-white"
+              disabled={uploadingImage}
+              className="mt-1 inline-flex px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
             >
               Agregar auto
             </button>
