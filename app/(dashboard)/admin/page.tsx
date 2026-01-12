@@ -1,139 +1,178 @@
-import Header from "@/components/layout/Header";
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Lead = {
+  id: number;
+  nombre: string;
+  email: string;
+  telefono_codigo: string | null;
+  telefono_numero: string;
+  provincia: string | null;
+  localidad: string | null;
+  canal_contacto: string | null;
+  created_at: string;
+};
+
+type Metrics = {
+  visits: number;
+  leads: number;
+  conversion: number;
+  whatsappClicks: number;
+  recentLeads: Lead[];
+};
 
 export default function AdminDashboardPage() {
-  // TODO: estos valores luego se van a traer desde Supabase / API
-  const stats = {
-    visits: 0,
-    leads: 0,
-    conversion: 0, // porcentaje
-  };
+  const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentLeads: {
-    id: string;
-    name: string;
-    phone: string;
-    createdAt: string;
-    provincia?: string;
-  }[] = [];
+  async function fetchAll() {
+    try {
+      const [mRes, lRes] = await Promise.all([
+        fetch("/api/dashboard"),
+        fetch("/api/leads"),
+      ]);
+
+      const mData = await mRes.json();
+      const lData = await lRes.json();
+
+      setMetrics(mData);
+      setLeads(lData.leads ?? []);
+    } catch (err) {
+      console.error("Error cargando dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchAll();
+    const id = setInterval(fetchAll, 10_000); // refresca cada 10 segundos
+    return () => clearInterval(id);
+  }, []);
+
+  if (loading && !metrics) {
+    return (
+      <div className="text-sm text-slate-400">
+        Cargando métricas y leads...
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen flex flex-col bg-gradient-to-b from-[#05070B] via-[#020308] to-black">
-      <Header />
+    <div className="space-y-6">
+      {/* TARJETAS PRINCIPALES */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricCard
+          title="Visitas a la landing"
+          value={metrics?.visits ?? 0}
+          description="Cantidad de veces que se registró una visita a la página."
+        />
+        <MetricCard
+          title="Formularios completados"
+          value={metrics?.leads ?? 0}
+          description="Personas que dejaron sus datos para ser contactadas."
+        />
+        <MetricCard
+          title="Tasa de conversión"
+          value={`${(metrics?.conversion ?? 0).toFixed(1)}%`}
+          description="Porcentaje de visitas que terminaron completando el formulario."
+        />
+      </section>
 
-      <section className="px-6 md:px-16 lg:px-24 py-8">
-        <div className="max-w-6xl mx-auto">
-          <header className="mb-6">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-gray-400">
-              Panel interno
-            </p>
-            <h1 className="text-2xl md:text-3xl font-semibold text-gray-50">
-              Dashboard · Plan Nacional tu 0km
-            </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Resumen rápido del rendimiento de la landing: visitas, formularios
-              completados y tasa de conversión. Más adelante podemos sumar filtros
-              por fecha, provincia y marca.
-            </p>
-          </header>
+      {/* CLICS WHATSAPP */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricCard
+          title="Clics a WhatsApp"
+          value={metrics?.whatsappClicks ?? 0}
+          description="Veces que los usuarios hicieron clic en los CTA hacia WhatsApp."
+        />
+      </section>
 
-          {/* MÉTRICAS PRINCIPALES */}
-          <section className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <article className="border border-white/10 rounded-2xl bg-white/5 p-4">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300 mb-1">
-                Visitas a la página
-              </p>
-              <p className="text-3xl font-semibold text-gray-50">
-                {stats.visits.toLocaleString("es-AR")}
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Total de veces que la landing fue vista. Este dato se va a
-                alimentar con los eventos de visita que registremos.
-              </p>
-            </article>
+      {/* LISTA DE LEADS */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold text-slate-100">
+          Últimos leads recibidos
+        </h2>
+        <div className="bg-slate-950/60 rounded-2xl border border-slate-800 overflow-hidden">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-900/80 text-slate-400 text-xs uppercase">
+              <tr>
+                <th className="px-4 py-2 text-left">Nombre</th>
+                <th className="px-4 py-2 text-left">Contacto</th>
+                <th className="px-4 py-2 text-left">Ubicación</th>
+                <th className="px-4 py-2 text-left">Canal</th>
+                <th className="px-4 py-2 text-left">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leads.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-4 text-center text-slate-500"
+                  >
+                    Todavía no hay leads registrados.
+                  </td>
+                </tr>
+              )}
 
-            <article className="border border-white/10 rounded-2xl bg-white/5 p-4">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300 mb-1">
-                Formularios completados
-              </p>
-              <p className="text-3xl font-semibold text-gray-50">
-                {stats.leads.toLocaleString("es-AR")}
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Cantidad de personas que dejaron sus datos para ser contactadas.
-              </p>
-            </article>
-
-            <article className="border border-white/10 rounded-2xl bg-white/5 p-4">
-              <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300 mb-1">
-                Tasa de conversión
-              </p>
-              <p className="text-3xl font-semibold text-gray-50">
-                {stats.conversion.toFixed(1)}%
-              </p>
-              <p className="text-[11px] text-gray-500 mt-1">
-                Porcentaje de visitas que terminaron completando el formulario.
-                Es uno de los indicadores más importantes de rendimiento.
-              </p>
-            </article>
-          </section>
-
-          {/* ACTIVIDAD RECIENTE */}
-          <section className="border border-white/10 rounded-2xl bg-black/70 p-4 md:p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.16em] text-gray-300">
-                  Actividad reciente
-                </p>
-                <p className="text-sm text-gray-400">
-                  Últimos formularios recibidos desde la landing.
-                </p>
-              </div>
-            </div>
-
-            {recentLeads.length === 0 ? (
-              <p className="text-[12px] text-gray-500">
-                Todavía no hay registros para mostrar en el dashboard. Cuando la
-                landing empiece a recibir tráfico y formularios, acá vas a ver
-                los últimos leads con nombre, provincia y fecha de alta.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-[12px] text-left border-separate border-spacing-y-2">
-                  <thead className="text-gray-400">
-                    <tr>
-                      <th className="px-2 py-1">Nombre</th>
-                      <th className="px-2 py-1">WhatsApp</th>
-                      <th className="px-2 py-1">Provincia</th>
-                      <th className="px-2 py-1">Fecha</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentLeads.map((lead) => (
-                      <tr
-                        key={lead.id}
-                        className="bg-white/5 hover:bg-white/10 transition"
-                      >
-                        <td className="px-2 py-2 rounded-l-lg text-gray-100">
-                          {lead.name || "Sin nombre"}
-                        </td>
-                        <td className="px-2 py-2 text-gray-300">
-                          {lead.phone}
-                        </td>
-                        <td className="px-2 py-2 text-gray-300">
-                          {lead.provincia || "-"}
-                        </td>
-                        <td className="px-2 py-2 rounded-r-lg text-gray-400">
-                          {lead.createdAt}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+              {leads.map((lead) => (
+                <tr
+                  key={lead.id}
+                  className="border-t border-slate-800/70 hover:bg-slate-900/50"
+                >
+                  <td className="px-4 py-2">{lead.nombre}</td>
+                  <td className="px-4 py-2 text-slate-300">
+                    {lead.email}
+                    <div className="text-[11px] text-slate-500">
+                      {lead.telefono_codigo
+                        ? \`(\${lead.telefono_codigo}) \${lead.telefono_numero}\`
+                        : lead.telefono_numero}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 text-slate-300">
+                    {lead.localidad || "-"}
+                    {lead.provincia ? \` · \${lead.provincia}\` : ""}
+                  </td>
+                  <td className="px-4 py-2 text-slate-300">
+                    {lead.canal_contacto || "-"}
+                  </td>
+                  <td className="px-4 py-2 text-slate-400 text-xs">
+                    {new Date(lead.created_at).toLocaleString("es-AR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
-    </main>
+    </div>
+  );
+}
+
+function MetricCard({
+  title,
+  value,
+  description,
+}: {
+  title: string;
+  value: number | string;
+  description: string;
+}) {
+  return (
+    <div className="bg-slate-950/60 rounded-2xl border border-slate-800 px-4 py-4">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500 mb-1">
+        {title}
+      </p>
+      <p className="text-3xl font-semibold text-slate-50 mb-2">{value}</p>
+      <p className="text-xs text-slate-400">{description}</p>
+    </div>
   );
 }
