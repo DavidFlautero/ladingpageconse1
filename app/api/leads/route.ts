@@ -1,97 +1,102 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// GET: listar últimos leads para el dashboard
-export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from("leads")
-    .select(
-      `
-      id,
-      nombre,
-      email,
-      telefono_codigo,
-      telefono_numero,
-      provincia,
-      localidad,
-      canal_contacto,
-      created_at
-    `
-    )
-    .order("created_at", { ascending: false })
-    .limit(50);
-
-  if (error) {
-    console.error("Error leyendo leads:", error);
-    return NextResponse.json(
-      { error: "No se pudieron obtener los leads" },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ leads: data ?? [] }, { status: 200 });
-}
-
-// POST: guardar un nuevo lead
 export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const {
-      nombre,
-      email,
-      telefonoCodigo,
-      telefonoNumero,
-      provincia,
-      localidad,
-      horarioDesde,
-      horarioHasta,
-      canalContacto,
-      comentario,
-      marcaInteres,
-      modeloInteres,
-    } = body || {};
+    // Aceptamos distintas formas de venir los datos
+    const nombre: string = (
+      body.nombre ??
+      body.full_name ??
+      ""
+    )
+      .toString()
+      .trim();
 
-    if (!nombre || !email || !telefonoNumero) {
+    let telefono = "";
+
+    if (body.telefono) {
+      telefono = String(body.telefono).trim();
+    } else {
+      const cod = body.telefono_codigo
+        ? String(body.telefono_codigo).trim()
+        : "";
+      const num = body.telefono_numero
+        ? String(body.telefono_numero).trim()
+        : "";
+      telefono = (cod + " " + num).trim();
+    }
+
+    if (!nombre || !telefono) {
       return NextResponse.json(
-        { error: "Faltan datos obligatorios." },
+        { ok: false, message: "Nombre y teléfono son obligatorios." },
         { status: 400 }
       );
     }
 
-    const { data: lead, error } = await supabaseAdmin
-      .from("leads")
-      .insert({
+    const { error } = await supabaseAdmin.from("landing_leads").insert([
+      {
         nombre,
-        email,
-        telefono_codigo: telefonoCodigo,
-        telefono_numero: telefonoNumero,
-        provincia,
-        localidad,
-        horario_desde: horarioDesde,
-        horario_hasta: horarioHasta,
-        canal_contacto: canalContacto,
-        comentario,
-        marca_interes: marcaInteres,
-        modelo_interes: modeloInteres,
-      })
-      .select()
-      .single();
+        telefono,
+        email: body.email ? String(body.email).trim() : null,
+        provincia: body.provincia ? String(body.provincia).trim() : null,
+        localidad: body.localidad ? String(body.localidad).trim() : null,
+        canal: body.canal_contacto
+          ? String(body.canal_contacto).trim()
+          : null,
+      },
+    ]);
 
     if (error) {
-      console.error("Error insertando lead:", error);
+      console.error("Insert error en landing_leads:", error);
       return NextResponse.json(
-        { error: "No se pudo guardar el lead" },
+        { ok: false, message: "No se pudo guardar el formulario." },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ ok: true, lead }, { status: 201 });
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Error en POST /api/leads:", err);
+    console.error("Error inesperado en POST /api/leads:", err);
     return NextResponse.json(
-      { error: "Error interno al procesar el lead." },
+      { ok: false, message: "Error inesperado." },
       { status: 500 }
     );
+  }
+}
+
+export async function GET() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("landing_leads")
+      .select(
+        "id, nombre, email, telefono, provincia, localidad, canal, created_at"
+      )
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error("Error consultando landing_leads:", error);
+      return NextResponse.json({ leads: [] }, { status: 500 });
+    }
+
+    // Normalizamos la respuesta a lo que espera tu dashboard
+    const leads = (data ?? []).map((row) => ({
+      id: row.id,
+      nombre: row.nombre,
+      email: row.email,
+      telefono_codigo: null,
+      telefono_numero: row.telefono,
+      provincia: row.provincia,
+      localidad: row.localidad,
+      canal_contacto: row.canal,
+      created_at: row.created_at,
+    }));
+
+    return NextResponse.json({ leads });
+  } catch (err) {
+    console.error("Error inesperado en GET /api/leads:", err);
+    return NextResponse.json({ leads: [] }, { status: 500 });
   }
 }
