@@ -5,9 +5,9 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-// Cliente de Supabase para el FRONT (usa anon key)
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+const BUCKET_NAME = "vehicle-images"; // el bucket en Supabase debe llamarse EXACTAMENTE así
 
 type Section = {
   id: number;
@@ -66,29 +66,29 @@ export default function ConfiguracionPage() {
     try {
       setUploadingImage(true);
 
-      const ext = file.name.split(".").pop();
+      const ext = file.name.split(".").pop() ?? "jpg";
       const fileName = `${Date.now()}-${Math.random()
         .toString(36)
         .slice(2)}.${ext}`;
-      const filePath = `autos/${fileName}`; // carpeta interna en el bucket
+      const filePath = `autos/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("vehicles") // nombre del bucket en Supabase Storage
+      const { data, error: uploadError } = await supabase.storage
+        .from(BUCKET_NAME)
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error(uploadError);
-        alert("Error al subir la imagen");
+        console.error("Error subiendo imagen a Supabase:", uploadError);
+        alert(`Error al subir la imagen: ${uploadError.message ?? ""}`);
         return;
       }
 
       const {
         data: { publicUrl },
-      } = supabase.storage.from("vehicles").getPublicUrl(filePath);
+      } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
 
       setVehicleImage(publicUrl);
     } catch (err) {
-      console.error(err);
+      console.error("Error inesperado al subir imagen:", err);
       alert("Error inesperado al subir la imagen");
     } finally {
       setUploadingImage(false);
@@ -111,7 +111,6 @@ export default function ConfiguracionPage() {
           ? Number(vehicleCuota.replace(".", "").replace(",", "."))
           : null,
         moneda: "ARS",
-        // la URL viene del upload a Supabase Storage
         imagenUrl: vehicleImage || null,
       }),
     });
