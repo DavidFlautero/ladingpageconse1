@@ -7,7 +7,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-const BUCKET_NAME = "vehicle-images"; // el bucket en Supabase debe llamarse EXACTAMENTE así
+// Debe existir este bucket en Supabase Storage
+const BUCKET_NAME = "vehicle-images";
 
 type Section = {
   id: number;
@@ -22,6 +23,9 @@ export default function ConfiguracionPage() {
   const [vehicleCuota, setVehicleCuota] = useState("");
   const [vehicleImage, setVehicleImage] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [savingVehicle, setSavingVehicle] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusError, setStatusError] = useState<string | null>(null);
 
   async function loadSections() {
     try {
@@ -51,7 +55,7 @@ export default function ConfiguracionPage() {
     });
 
     if (!res.ok) {
-      console.error("Error creando sección");
+      console.error("Error creando sección", await res.text().catch(() => ""));
       return;
     }
 
@@ -64,6 +68,8 @@ export default function ConfiguracionPage() {
     if (!file) return;
 
     try {
+      setStatusMessage(null);
+      setStatusError(null);
       setUploadingImage(true);
 
       const ext = file.name.split(".").pop() ?? "jpg";
@@ -72,13 +78,15 @@ export default function ConfiguracionPage() {
         .slice(2)}.${ext}`;
       const filePath = `autos/${fileName}`;
 
-      const { data, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from(BUCKET_NAME)
         .upload(filePath, file);
 
       if (uploadError) {
         console.error("Error subiendo imagen a Supabase:", uploadError);
-        alert(`Error al subir la imagen: ${uploadError.message ?? ""}`);
+        setStatusError(
+          `Error al subir la imagen: ${uploadError.message ?? ""}`
+        );
         return;
       }
 
@@ -87,9 +95,10 @@ export default function ConfiguracionPage() {
       } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
 
       setVehicleImage(publicUrl);
+      setStatusMessage("Imagen cargada correctamente.");
     } catch (err) {
       console.error("Error inesperado al subir imagen:", err);
-      alert("Error inesperado al subir la imagen");
+      setStatusError("Error inesperado al subir la imagen.");
     } finally {
       setUploadingImage(false);
     }
@@ -97,32 +106,51 @@ export default function ConfiguracionPage() {
 
   async function handleCreateVehicle(e: FormEvent) {
     e.preventDefault();
+    setStatusMessage(null);
+    setStatusError(null);
 
-    if (!selectedSectionId || !vehicleTitle.trim()) return;
-
-    const res = await fetch("/api/vehicles", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "vehicle",
-        sectionId: selectedSectionId,
-        title: vehicleTitle.trim(),
-        cuotaDesde: vehicleCuota
-          ? Number(vehicleCuota.replace(".", "").replace(",", "."))
-          : null,
-        moneda: "ARS",
-        imagenUrl: vehicleImage || null,
-      }),
-    });
-
-    if (!res.ok) {
-      console.error("Error creando vehículo");
+    if (!selectedSectionId || !vehicleTitle.trim()) {
+      setStatusError("Elegí una sección y escribí el nombre del auto.");
       return;
     }
 
-    setVehicleTitle("");
-    setVehicleCuota("");
-    setVehicleImage("");
+    setSavingVehicle(true);
+
+    try {
+      const res = await fetch("/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "vehicle",
+          sectionId: selectedSectionId,
+          title: vehicleTitle.trim(),
+          cuotaDesde: vehicleCuota
+            ? Number(vehicleCuota.replace(".", "").replace(",", "."))
+            : null,
+          moneda: "ARS",
+          imagenUrl: vehicleImage || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Error creando vehículo:", res.status, text);
+        setStatusError(
+          "No se pudo guardar el auto. Revisá la consola (F12 → Console) para ver el detalle."
+        );
+        return;
+      }
+
+      setStatusMessage("Auto guardado correctamente.");
+      setVehicleTitle("");
+      setVehicleCuota("");
+      setVehicleImage("");
+    } catch (err) {
+      console.error("Error llamando a /api/vehicles:", err);
+      setStatusError("Ocurrió un error de red al guardar el auto.");
+    } finally {
+      setSavingVehicle(false);
+    }
   }
 
   return (
@@ -229,23 +257,26 @@ export default function ConfiguracionPage() {
                 Subiendo imagen...
               </p>
             )}
-            {!uploadingImage && vehicleImage && (
-              <p className="text-xs text-emerald-400 mt-1">
-                Imagen cargada correctamente.
-              </p>
-            )}
           </div>
 
           <div className="md:col-span-4">
             <button
               type="submit"
-              disabled={uploadingImage}
+              disabled={uploadingImage || savingVehicle}
               className="mt-1 inline-flex px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Agregar auto
+              {savingVehicle ? "Guardando..." : "Agregar auto"}
             </button>
           </div>
         </form>
+
+        {/* Mensajes de estado */}
+        {statusMessage && (
+          <p className="mt-2 text-xs text-emerald-400">{statusMessage}</p>
+        )}
+        {statusError && (
+          <p className="mt-2 text-xs text-red-400">{statusError}</p>
+        )}
       </section>
     </div>
   );
