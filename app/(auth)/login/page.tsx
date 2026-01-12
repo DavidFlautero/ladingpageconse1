@@ -23,13 +23,16 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password,
+        password,
       });
 
+      console.log("SUPABASE LOGIN RESPONSE:", { data, error });
+
       if (error) {
-        setErrorMsg(error.message || "No se pudo iniciar sesión.");
+        // Mostramos el mensaje completo para ver qué está pasando
+        setErrorMsg(`Error al iniciar sesión: ${error.message}`);
         setLoading(false);
         return;
       }
@@ -37,8 +40,8 @@ export default function LoginPage() {
       // Login OK → redirigimos al panel
       router.push("/admin");
     } catch (err: any) {
-      console.error("Error login:", err);
-      setErrorMsg("Ocurrió un error inesperado. Intentá de nuevo.");
+      console.error("Error login (catch):", err);
+      setErrorMsg("Error inesperado al conectar con Supabase.");
       setLoading(false);
     }
   }
@@ -48,7 +51,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl shadow-[0_20px_60px_rgba(15,23,42,0.18)] p-6 md:p-8">
         <div className="mb-6 text-center">
           <p className="text-[11px] uppercase tracking-[0.22em] text-slate-500 mb-2">
-            Panel interno
+            Panel interior
           </p>
           <h1 className="text-xl font-semibold text-slate-900">
             Iniciar sesión
@@ -61,7 +64,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-[12px] font-medium text-slate-700 mb-1">
-              Email
+              Correo electrónico
             </label>
             <input
               type="email"
@@ -98,7 +101,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-full bg-sky-700 py-2.5 text-sm font-medium text-white shadow-lg hover:bg-sky-600 transition disabled:opacity-70"
           >
-            {loading ? "Ingresando..." : "Entrar"}
+            {loading ? "Ingresando..." : "Para entrar"}
           </button>
 
           <p className="mt-3 text-[11px] text-slate-500 text-center">
