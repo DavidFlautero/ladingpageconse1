@@ -1,39 +1,50 @@
-import { NextResponse } from "next/server";
-import { supabase } from "@/lib/config";
+import { NextRequest, NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// Si estás usando Edge y te da problemas, descomentá esto:
-// export const runtime = "nodejs";
+// Usamos la misma tabla/columnas que en lib/config.ts
+const TABLE = "config";
+const KEY_COLUMN = "key";
+const VALUE_COLUMN = "value";
+const KEY = "whatsapp_number";
 
 export async function GET() {
-  if (!supabase) {
+  const { data, error } = await supabaseAdmin
+    .from(TABLE)
+    .select(`${VALUE_COLUMN}`)
+    .eq(KEY_COLUMN, KEY)
+    .maybeSingle();
+
+  if (error) {
+    console.error("GET /api/config/whatsapp error", error);
+    return NextResponse.json({ number: null }, { status: 500 });
+  }
+
+  // @ts-ignore
+  const raw = data ? (data[VALUE_COLUMN] as string | null) : null;
+  return NextResponse.json({ number: raw ?? null });
+}
+
+export async function POST(req: NextRequest) {
+  const body = await req.json();
+  const rawNumber: string = (body.number ?? "").toString().trim();
+
+  const { error } = await supabaseAdmin
+    .from(TABLE)
+    .upsert(
+      {
+        [KEY_COLUMN]: KEY,
+        [VALUE_COLUMN]: rawNumber,
+      },
+      { onConflict: KEY_COLUMN }
+    );
+
+  if (error) {
+    console.error("POST /api/config/whatsapp error", error);
     return NextResponse.json(
-      { error: "Supabase no está configurado en el entorno (env vars faltantes)." },
+      { message: "No se pudo guardar el número de WhatsApp." },
       { status: 500 }
     );
   }
 
-  try {
-    // EJEMPLO: ajustá esto a lo que realmente hacías
-    const { data, error } = await supabase
-      .from("config_whatsapp")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error al leer config de WhatsApp:", error);
-      return NextResponse.json(
-        { error: "No se pudo obtener la configuración de WhatsApp." },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ config: data ?? null });
-  } catch (err) {
-    console.error("Error inesperado en /api/config/whatsapp:", err);
-    return NextResponse.json(
-      { error: "Error interno en la API de configuración de WhatsApp." },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({ ok: true, number: rawNumber });
 }

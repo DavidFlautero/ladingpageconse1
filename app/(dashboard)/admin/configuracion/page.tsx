@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-  FormEvent,
-  ChangeEvent,
-} from "react";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -14,25 +9,11 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const BUCKET_NAME = "vehicle-images";
 
-type Vehicle = {
-  id: number;
-  title: string;
-  cuota_desde: number | null;
-  moneda: string | null;
-  imagen_url: string | null;
-};
-
 type Section = {
   id: number;
   title: string;
   visible: boolean;
-  vehicles: Vehicle[];
 };
-
-function formatCuota(cuota: number | null | undefined) {
-  if (cuota == null) return "-";
-  return new Intl.NumberFormat("es-AR").format(Number(cuota));
-}
 
 export default function ConfiguracionPage() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -46,9 +27,10 @@ export default function ConfiguracionPage() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
-  const [editingVehicleId, setEditingVehicleId] = useState<number | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editCuota, setEditCuota] = useState("");
+  // WhatsApp del panel
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [loadingWhatsapp, setLoadingWhatsapp] = useState(true);
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   async function loadSections() {
     try {
@@ -60,14 +42,6 @@ export default function ConfiguracionPage() {
           id: s.id,
           title: s.title,
           visible: !!s.visible,
-          vehicles:
-            s.vehicles?.map((v: any) => ({
-              id: v.id,
-              title: v.title,
-              cuota_desde: v.cuota_desde,
-              moneda: v.moneda,
-              imagen_url: v.imagen_url,
-            })) ?? [],
         })) ?? [];
 
       setSections(mapped);
@@ -76,9 +50,58 @@ export default function ConfiguracionPage() {
     }
   }
 
+  async function loadWhatsapp() {
+    try {
+      const res = await fetch("/api/config/whatsapp");
+      if (!res.ok) {
+        console.error(
+          "Error cargando número de WhatsApp",
+          await res.text().catch(() => "")
+        );
+        return;
+      }
+      const json = await res.json();
+      setWhatsappNumber(json.number ?? "");
+    } catch (e) {
+      console.error("Error cargando número de WhatsApp", e);
+    } finally {
+      setLoadingWhatsapp(false);
+    }
+  }
+
   useEffect(() => {
     loadSections();
+    loadWhatsapp();
   }, []);
+
+  async function handleSaveWhatsapp(e: FormEvent) {
+    e.preventDefault();
+    setStatusMessage(null);
+    setStatusError(null);
+    setSavingWhatsapp(true);
+
+    try {
+      const res = await fetch("/api/config/whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ number: whatsappNumber }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Error guardando número de WhatsApp:", res.status, text);
+        setStatusError("No se pudo guardar el número de WhatsApp.");
+        return;
+      }
+
+      setStatusMessage("Número de WhatsApp guardado correctamente.");
+    } catch (err) {
+      console.error("Error llamando a /api/config/whatsapp:", err);
+      setStatusError("Error de red al guardar el número de WhatsApp.");
+    } finally {
+      setSavingWhatsapp(false);
+    }
+  }
 
   async function handleCreateSection(e: FormEvent) {
     e.preventDefault();
@@ -216,7 +239,6 @@ export default function ConfiguracionPage() {
       setVehicleTitle("");
       setVehicleCuota("");
       setVehicleImage("");
-      await loadSections();
     } catch (err) {
       console.error("Error llamando a /api/vehicles:", err);
       setStatusError("Ocurrió un error de red al guardar el auto.");
@@ -225,102 +247,54 @@ export default function ConfiguracionPage() {
     }
   }
 
-  function startEditVehicle(v: Vehicle) {
-    setEditingVehicleId(v.id);
-    setEditTitle(v.title);
-    setEditCuota(
-      v.cuota_desde != null
-        ? new Intl.NumberFormat("es-AR").format(Number(v.cuota_desde))
-        : ""
-    );
-  }
-
-  function cancelEditVehicle() {
-    setEditingVehicleId(null);
-    setEditTitle("");
-    setEditCuota("");
-  }
-
-  async function handleSaveVehicleEdit(id: number) {
-    setStatusError(null);
-    setStatusMessage(null);
-
-    try {
-      const cuotaNumber = editCuota
-        ? Number(editCuota.replace(/\./g, "").replace(",", "."))
-        : null;
-
-      const res = await fetch("/api/vehicles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "update_vehicle",
-          id,
-          title: editTitle.trim(),
-          cuotaDesde: cuotaNumber,
-          moneda: "ARS",
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        console.error("Error actualizando vehículo:", res.status, text);
-        setStatusError("No se pudo actualizar el vehículo.");
-        return;
-      }
-
-      setStatusMessage("Vehículo actualizado correctamente.");
-      cancelEditVehicle();
-      await loadSections();
-    } catch (err) {
-      console.error("Error llamando a /api/vehicles (update_vehicle):", err);
-      setStatusError("Ocurrió un error al actualizar el vehículo.");
-    }
-  }
-
-  async function handleDeleteVehicle(id: number) {
-    const confirmDelete = window.confirm(
-      "¿Seguro que querés eliminar este auto de la landing?"
-    );
-    if (!confirmDelete) return;
-
-    setStatusError(null);
-    setStatusMessage(null);
-
-    try {
-      const res = await fetch("/api/vehicles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "delete_vehicle",
-          id,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        console.error("Error eliminando vehículo:", res.status, text);
-        setStatusError("No se pudo eliminar el vehículo.");
-        return;
-      }
-
-      setStatusMessage("Vehículo eliminado correctamente.");
-      await loadSections();
-    } catch (err) {
-      console.error("Error llamando a /api/vehicles (delete_vehicle):", err);
-      setStatusError("Ocurrió un error al eliminar el vehículo.");
-    }
-  }
-
   return (
     <div className="space-y-8">
+      {/* WHATSAPP DEL PANEL */}
+      <section className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6">
+        <h1 className="text-lg font-semibold text-slate-50 mb-1">
+          WhatsApp del panel
+        </h1>
+        <p className="text-sm text-slate-400 mb-4">
+          Este número se usa en el botón flotante de WhatsApp en la landing
+          para que los leads vayan directo al asesor.
+        </p>
+
+        <form
+          onSubmit={handleSaveWhatsapp}
+          className="flex flex-col md:flex-row gap-3 items-start md:items-end"
+        >
+          <div className="flex-1 w-full">
+            <label className="block text-xs font-medium text-slate-300 mb-1">
+              Número de WhatsApp (con código de país)
+            </label>
+            <input
+              type="text"
+              value={whatsappNumber}
+              onChange={(e) => setWhatsappNumber(e.target.value)}
+              placeholder="Ej: 5491133344455"
+              className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-50"
+              disabled={loadingWhatsapp}
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={savingWhatsapp || loadingWhatsapp}
+            className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-sm font-medium text-white disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {savingWhatsapp ? "Guardando…" : "Guardar número"}
+          </button>
+        </form>
+      </section>
+
+      {/* CONFIGURACIÓN DE AUTOS EN LA LANDING */}
       <section className="bg-slate-950/60 border border-slate-800 rounded-2xl p-6">
         <h1 className="text-lg font-semibold text-slate-50 mb-1">
           Configuración de autos en la landing
         </h1>
         <p className="text-sm text-slate-400 mb-4">
-          Creá secciones por marca, cargá autos con imágenes y cuotas y
-          administrá los modelos que hoy se muestran en la landing.
+          Creá secciones por marca (Chevrolet, Volkswagen, etc.) y cargá los
+          autos que se van a mostrar de a tres por fila en la landing. Podés
+          decidir qué marcas se muestran u ocultan.
         </p>
 
         {/* Secciones creadas + toggle Visible */}
@@ -417,7 +391,7 @@ export default function ConfiguracionPage() {
               type="text"
               value={vehicleTitle}
               onChange={(e) => setVehicleTitle(e.target.value)}
-              placeholder="Ej: T-Cross 200 TSI AT"
+              placeholder="Ej: Tracker 1.2T AT"
               className="w-full rounded-lg border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-50"
             />
           </div>
@@ -446,11 +420,8 @@ export default function ConfiguracionPage() {
               className="w-full text-sm text-slate-50"
             />
             {uploadingImage && (
-              <p className="text-xs text-slate-400 mt-1">Subiendo imagen...</p>
-            )}
-            {!uploadingImage && vehicleImage && (
-              <p className="text-xs text-emerald-400 mt-1">
-                Imagen cargada correctamente.
+              <p className="text-xs text-slate-400 mt-1">
+                Subiendo imagen...
               </p>
             )}
           </div>
@@ -466,134 +437,6 @@ export default function ConfiguracionPage() {
           </div>
         </form>
 
-        {/* AUTOS CARGADOS POR SECCIÓN */}
-        <div className="mt-8 border-t border-slate-800 pt-6">
-          <h3 className="text-sm font-semibold text-slate-100 mb-3">
-            Autos cargados por sección
-          </h3>
-
-          {sections.every((s) => s.vehicles.length === 0) ? (
-            <p className="text-xs text-slate-400">
-              Todavía no cargaste autos en ninguna sección.
-            </p>
-          ) : (
-            <div className="space-y-6">
-              {sections.map((section) => (
-                <div key={section.id}>
-                  <p className="text-xs font-semibold text-slate-200 mb-2">
-                    {section.title}
-                  </p>
-
-                  {section.vehicles.length === 0 ? (
-                    <p className="text-[11px] text-slate-500">
-                      Sin autos cargados en esta sección.
-                    </p>
-                  ) : (
-                    <div className="space-y-2">
-                      {section.vehicles.map((v) => {
-                        const isEditing = editingVehicleId === v.id;
-                        return (
-                          <div
-                            key={v.id}
-                            className="flex items-center justify-between gap-3 rounded-xl border border-slate-800 bg-slate-950/60 px-3 py-2"
-                          >
-                            <div className="flex items-center gap-3">
-                              {v.imagen_url && (
-                                <img
-                                  src={v.imagen_url}
-                                  alt={v.title}
-                                  className="h-10 w-16 rounded-lg object-cover border border-slate-700"
-                                />
-                              )}
-                              <div className="space-y-0.5">
-                                {isEditing ? (
-                                  <>
-                                    <input
-                                      className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
-                                      value={editTitle}
-                                      onChange={(e) =>
-                                        setEditTitle(e.target.value)
-                                      }
-                                    />
-                                    <input
-                                      className="w-full rounded-md border border-slate-700 bg-slate-900/70 px-2 py-1 text-xs text-slate-50"
-                                      value={editCuota}
-                                      onChange={(e) =>
-                                        setEditCuota(e.target.value)
-                                      }
-                                      placeholder="Cuota desde (ej: 250.000)"
-                                    />
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="text-xs font-semibold text-slate-100">
-                                      {v.title}
-                                    </p>
-                                    <p className="text-[11px] text-slate-400">
-                                      Cuota desde{" "}
-                                      <span className="font-semibold">
-                                        {v.moneda === "ARS" ? "$" : ""}
-                                        {formatCuota(v.cuota_desde)}
-                                      </span>
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              {isEditing ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleSaveVehicleEdit(v.id)
-                                    }
-                                    className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-[11px] font-medium text-white"
-                                  >
-                                    Guardar
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={cancelEditVehicle}
-                                    className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
-                                  >
-                                    Cancelar
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    onClick={() => startEditVehicle(v)}
-                                    className="px-2 py-1 rounded-md bg-slate-700 hover:bg-slate-600 text-[11px] font-medium text-slate-50"
-                                  >
-                                    Editar
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleDeleteVehicle(v.id)
-                                    }
-                                    className="px-2 py-1 rounded-md bg-red-600 hover:bg-red-500 text-[11px] font-medium text-white"
-                                  >
-                                    Eliminar
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Mensajes de estado */}
         {statusMessage && (
           <p className="mt-2 text-xs text-emerald-400">{statusMessage}</p>
         )}
