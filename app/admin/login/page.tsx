@@ -1,12 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/admin";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +29,8 @@ export default function AdminLoginPage() {
         return;
       }
 
-      router.push(redirectTo);
+      // Si todo OK, al panel /admin
+      router.push("/admin");
       router.refresh();
     } catch (err) {
       console.error("Error en login admin:", err);

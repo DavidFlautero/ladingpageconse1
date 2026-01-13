@@ -1,49 +1,79 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import LeadForm from "./LeadForm";
 
 export default function EntryModal() {
   const [open, setOpen] = useState(false);
 
-  // Abre el modal automáticamente unos segundos después de cargar
+  // Abrir solo una vez por sesión
   useEffect(() => {
-    const timer = setTimeout(() => setOpen(true), 4000);
-    return () => clearTimeout(timer);
+    if (typeof window === "undefined") return;
+    const dismissed = window.sessionStorage.getItem("entry-modal-dismissed");
+    if (!dismissed) {
+      setOpen(true);
+    }
   }, []);
+
+  function close() {
+    setOpen(false);
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("entry-modal-dismissed", "1");
+    }
+  }
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-4">
-      <div className="relative w-full max-w-xl rounded-3xl border border-slate-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.45)]">
-        {/* Botón cerrar */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-3">
+      {/* CARD: max alto pantalla, con scroll interno */}
+      <div className="relative w-full max-w-md rounded-3xl bg-white text-slate-900 shadow-2xl max-h-[calc(100vh-3rem)] overflow-y-auto">
+        {/* BOTÓN CERRAR SIEMPRE VISIBLE */}
         <button
-          onClick={() => setOpen(false)}
           type="button"
-          className="absolute right-4 top-4 inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700"
-          aria-label="Cerrar"
+          onClick={close}
+          className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/10 text-slate-700 hover:bg-black/20"
         >
+          <span className="sr-only">Cerrar</span>
           ✕
         </button>
 
-        <div className="px-5 pt-5 pb-4">
-          <div className="mb-3 text-center">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sky-600 mb-1">
-              Cupos limitados
-            </p>
-            <h2 className="text-base font-semibold text-slate-900">
-              Reservá tu cupo de asesoría 0km
-            </h2>
-            <p className="mt-1 text-[11px] text-slate-600">
-              Con sólo completar el formulario vas a recibir opciones vigentes,
-              bonificaciones y condiciones para llegar a tu 0km en cuotas.
-              Un asesor oficial te va a contactar por WhatsApp o teléfono
-              en el horario que elijas. Sin costo inicial ni compromiso de compra.
-            </p>
-          </div>
+        {/* CONTENIDO */}
+        <div className="px-5 pt-10 pb-5">
+          <p className="text-[11px] font-semibold tracking-[0.18em] uppercase text-slate-500 mb-2">
+            Consulta de acceso a tu 0km
+          </p>
+          <h2 className="text-lg font-semibold text-slate-900 mb-2">
+            Antes de seguir, completá tu consulta para evaluar si podés acceder al 0km en cuotas.
+          </h2>
+          <p className="text-sm text-slate-600 mb-4">
+            Es un formulario único: con estos datos un asesor oficial revisa tu perfil y después te
+            contacta por WhatsApp o teléfono con las alternativas vigentes.
+          </p>
 
-          <LeadForm />
+          {/* CTA PRINCIPAL: ir al formulario */}
+          <div className="space-y-2">
+            <a
+              href="#form"
+              onClick={close}
+              className="block w-full rounded-full bg-sky-600 hover:bg-sky-500 text-sm font-semibold text-white text-center py-2.5 shadow-[0_14px_30px_rgba(37,99,235,0.55)]"
+            >
+              Ir al formulario principal
+            </a>
+
+            <p className="text-[11px] text-slate-500 text-center">
+              Es gratis, no compromete compra y no impacta tu scoring. Podés cerrarlo si preferís
+              solo mirar la información de la página.
+            </p>
+
+            {/* OPCIÓN SECUNDARIA: solo cerrar */}
+            <button
+              type="button"
+              onClick={close}
+              className="block w-full rounded-full border border-slate-300 bg-white text-xs font-medium text-slate-700 py-2 mt-2"
+            >
+              Cerrar y seguir navegando
+            </button>
+          </div>
         </div>
       </div>
     </div>
