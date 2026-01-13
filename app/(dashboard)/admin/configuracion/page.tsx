@@ -9,10 +9,22 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const BUCKET_NAME = "vehicle-images";
 
+type Vehicle = {
+  id: number;
+  title: string;
+  cuota_desde: number | null;
+  moneda: string | null;
+  imagen_url: string | null;
+  imagen_url_2?: string | null;
+  imagen_url_3?: string | null;
+  orden: number | null;
+};
+
 type Section = {
   id: number;
   title: string;
   visible: boolean;
+  vehicles: Vehicle[];
 };
 
 export default function ConfiguracionPage() {
@@ -42,6 +54,17 @@ export default function ConfiguracionPage() {
           id: s.id,
           title: s.title,
           visible: !!s.visible,
+          vehicles:
+            s.vehicles?.map((v: any) => ({
+              id: v.id,
+              title: v.title,
+              cuota_desde: v.cuota_desde ?? null,
+              moneda: v.moneda ?? null,
+              imagen_url: v.imagen_url ?? null,
+              imagen_url_2: v.imagen_url_2 ?? null,
+              imagen_url_3: v.imagen_url_3 ?? null,
+              orden: v.orden ?? null,
+            })) ?? [],
         })) ?? [];
 
       setSections(mapped);
@@ -136,8 +159,8 @@ export default function ConfiguracionPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type: "toggle-section",
-        id: section.id,
+        type: "toggle_section_visibility",
+        sectionId: section.id,
         visible: newVisible,
       }),
     });
@@ -222,7 +245,7 @@ export default function ConfiguracionPage() {
           title: vehicleTitle.trim(),
           cuotaDesde: cuotaNumber,
           moneda: "ARS",
-          imagenUrl: vehicleImage || null,
+          imagen1: vehicleImage || null,
         }),
       });
 
@@ -239,6 +262,7 @@ export default function ConfiguracionPage() {
       setVehicleTitle("");
       setVehicleCuota("");
       setVehicleImage("");
+      await loadSections();
     } catch (err) {
       console.error("Error llamando a /api/vehicles:", err);
       setStatusError("Ocurrió un error de red al guardar el auto.");
@@ -246,6 +270,55 @@ export default function ConfiguracionPage() {
       setSavingVehicle(false);
     }
   }
+
+  async function handleDeleteVehicle(sectionId: number, vehicleId: number) {
+    const ok = window.confirm(
+      "¿Seguro que querés borrar este auto de la landing?"
+    );
+    if (!ok) return;
+
+    setStatusMessage(null);
+    setStatusError(null);
+
+    try {
+      const res = await fetch("/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "delete_vehicle",
+          id: vehicleId,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Error borrando vehículo:", res.status, text);
+        setStatusError("No se pudo borrar el auto.");
+        return;
+      }
+
+      // Actualizamos el estado local para que desaparezca de la lista
+      setSections((prev) =>
+        prev.map((s) =>
+          s.id === sectionId
+            ? {
+                ...s,
+                vehicles: s.vehicles.filter((v) => v.id !== vehicleId),
+              }
+            : s
+        )
+      );
+
+      setStatusMessage("Auto borrado correctamente.");
+    } catch (err) {
+      console.error("Error llamando a /api/vehicles (delete_vehicle):", err);
+      setStatusError("Ocurrió un error al borrar el auto.");
+    }
+  }
+
+  const anyVehicles = sections.some(
+    (s) => s.vehicles && s.vehicles.length > 0
+  );
 
   return (
     <div className="space-y-8">
@@ -261,7 +334,7 @@ export default function ConfiguracionPage() {
 
         <form
           onSubmit={handleSaveWhatsapp}
-          className="flex flex-col md:flex-row gap-3 items-start md:items-end"
+          className "flex flex-col md:flex-row gap-3 items-start md:items-end"
         >
           <div className="flex-1 w-full">
             <label className="block text-xs font-medium text-slate-300 mb-1">
@@ -437,11 +510,84 @@ export default function ConfiguracionPage() {
           </div>
         </form>
 
+        {/* Mensajes de estado generales */}
         {statusMessage && (
           <p className="mt-2 text-xs text-emerald-400">{statusMessage}</p>
         )}
         {statusError && (
           <p className="mt-2 text-xs text-red-400">{statusError}</p>
+        )}
+
+        {/* LISTADO DE AUTOS ACTUALMENTE EN LA LANDING */}
+        {anyVehicles && (
+          <div className="mt-8 border-t border-slate-800 pt-5">
+            <h2 className="text-sm font-semibold text-slate-200 mb-3">
+              Autos actualmente en la landing
+            </h2>
+
+            <div className="space-y-6">
+              {sections.map((section) =>
+                section.vehicles.length > 0 ? (
+                  <div key={section.id} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-semibold text-slate-100">
+                        {section.title}
+                      </p>
+                      <span className="text-[11px] text-slate-400">
+                        {section.vehicles.length} auto
+                        {section.vehicles.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {section.vehicles.map((vehicle) => (
+                        <div
+                          key={vehicle.id}
+                          className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 flex flex-col gap-2"
+                        >
+                          {vehicle.imagen_url && (
+                            <div className="relative w-full h-32 overflow-hidden rounded-lg bg-slate-900">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={vehicle.imagen_url}
+                                alt={vehicle.title}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-slate-50">
+                              {vehicle.title}
+                            </p>
+                            {vehicle.cuota_desde !== null && (
+                              <p className="text-[11px] text-slate-300 mt-0.5">
+                                Cuotas desde{" "}
+                                <span className="font-semibold">
+                                  {vehicle.moneda ?? "ARS"}{" "}
+                                  {vehicle.cuota_desde.toLocaleString("es-AR")}
+                                </span>
+                              </p>
+                            )}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDeleteVehicle(section.id, vehicle.id)
+                            }
+                            className="mt-1 inline-flex justify-center px-3 py-1.5 rounded-lg bg-red-600/90 hover:bg-red-500 text-[11px] font-medium text-white"
+                          >
+                            Borrar auto
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null
+              )}
+            </div>
+          </div>
         )}
       </section>
     </div>
