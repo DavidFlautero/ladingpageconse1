@@ -297,7 +297,6 @@ export default function ConfiguracionPage() {
         return;
       }
 
-      // Actualizamos el estado local para que desaparezca de la lista
       setSections((prev) =>
         prev.map((s) =>
           s.id === sectionId
@@ -334,7 +333,7 @@ export default function ConfiguracionPage() {
 
         <form
           onSubmit={handleSaveWhatsapp}
-          className "flex flex-col md:flex-row gap-3 items-start md:items-end"
+          className="flex flex-col md:flex-row gap-3 items-start md:items-end"
         >
           <div className="flex-1 w-full">
             <label className="block text-xs font-medium text-slate-300 mb-1">
