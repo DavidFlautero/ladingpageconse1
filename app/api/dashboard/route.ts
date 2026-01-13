@@ -3,18 +3,12 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 /**
  * GET /api/dashboard
- *  - visits: placeholder (0 por ahora)
- *  - leads: cantidad total
- *  - conversion: placeholder (0)
- *  - recent: últimos leads desde landing_leads
+ * Devuelve métricas básicas + últimos leads desde landing_leads.
  */
 export async function GET() {
   const { data, error, count } = await supabaseAdmin
     .from("landing_leads")
-    .select(
-      "id, nombre, email, telefono, created_at, seguimiento, visto",
-      { count: "exact" }
-    )
+    .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
     .limit(50);
 
@@ -31,39 +25,36 @@ export async function GET() {
     );
   }
 
-  const visits = 0; // más adelante conectamos visitas reales
-  const leads = count ?? data?.length ?? 0;
-  const conversion = 0;
+  const leads = (data ?? []) as any[];
 
-  // Adaptamos telefono -> telefono_numero para el front
-  const recent = (data ?? []).map((l: any) => ({
-    id: l.id,
-    nombre: l.nombre,
-    email: l.email,
-    telefono_numero: l.telefono ?? "",
-    created_at: l.created_at ?? null,
-    seguimiento: l.seguimiento ?? null,
-    visto: l.visto ?? null,
+  const adapted = leads.map((l) => ({
+    ...l,
+    telefono_numero: l.telefono_numero ?? l.telefono ?? "",
   }));
+
+  const visits = 0;
+  const leadsCount = count ?? adapted.length;
+  const conversion =
+    visits > 0 ? Number(((leadsCount / visits) * 100).toFixed(1)) : 0;
 
   return NextResponse.json({
     visits,
-    leads,
+    leads: leadsCount,
     conversion,
-    recent,
+    recent: adapted,
   });
 }
 
 /**
  * POST /api/dashboard
- * type = "update_lead"
- *    body: { id, seguimiento?, visto? }
+ *  - type = "update_lead": actualizar datos / seguimiento / estado / visto
+ *  - type = "delete_lead": borrar lead
  */
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
   if (body.type === "update_lead") {
-    const { id, seguimiento, visto } = body;
+    const { id, nombre, email, telefono, seguimiento, visto, estado } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -73,8 +64,16 @@ export async function POST(req: NextRequest) {
     }
 
     const update: Record<string, any> = {};
+
+    if (nombre !== undefined) update.nombre = nombre;
+    if (email !== undefined) update.email = email;
+    if (telefono !== undefined) {
+      // en la tabla usamos "telefono"
+      update.telefono = telefono;
+    }
     if (seguimiento !== undefined) update.seguimiento = seguimiento;
     if (visto !== undefined) update.visto = visto;
+    if (estado !== undefined) update.estado = estado;
 
     if (Object.keys(update).length === 0) {
       return NextResponse.json(
@@ -87,9 +86,7 @@ export async function POST(req: NextRequest) {
       .from("landing_leads")
       .update(update)
       .eq("id", id)
-      .select(
-        "id, nombre, email, telefono, created_at, seguimiento, visto"
-      )
+      .select("*")
       .single();
 
     if (error) {
@@ -100,18 +97,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Volvemos a adaptar telefono -> telefono_numero para el front
-    const leadAdaptado = {
-      id: data.id,
-      nombre: data.nombre,
-      email: data.email,
-      telefono_numero: data.telefono ?? "",
-      created_at: data.created_at ?? null,
-      seguimiento: data.seguimiento ?? null,
-      visto: data.visto ?? null,
+    const adapted = {
+      ...data,
+      telefono_numero: data.telefono_numero ?? data.telefono ?? "",
     };
 
-    return NextResponse.json({ lead: leadAdaptado });
+    return NextResponse.json({ lead: adapted });
+  }
+
+  if (body.type === "delete_lead") {
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json(
+        { message: "id de lead requerido." },
+        { status: 400 }
+      );
+    }
+
+    const { error } = await supabaseAdmin
+      .from("landing_leads")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("POST /api/dashboard (delete_lead) error", error);
+      return NextResponse.json(
+        { message: "No se pudo borrar el lead." },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ ok: true });
   }
 
   return NextResponse.json({ message: "Tipo no soportado." }, { status: 400 });
