@@ -46,7 +46,6 @@ export default function AnnouncementBar() {
     const id = setInterval(() => {
       const diff = target - Date.now();
       if (diff <= 0) {
-        // Reiniciar ciclo semanal
         const next = getNextWeeklyReset();
         setTarget(next);
         setRemainingMs(next - Date.now());
