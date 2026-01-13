@@ -1,117 +1,102 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function POST(req: NextRequest) {
-  let body: any;
-
+export async function POST(req: Request) {
   try {
-    body = await req.json();
-  } catch {
-    console.error("[/api/leads] Error parseando JSON del body");
-    return NextResponse.json(
-      { ok: false, message: "Payload inválido." },
-      { status: 400 }
-    );
-  }
+    const body = await req.json();
 
-  console.log("[/api/leads] Body recibido:", body);
+    // Aceptamos distintas formas de venir los datos
+    const nombre: string = (
+      body.nombre ??
+      body.full_name ??
+      ""
+    )
+      .toString()
+      .trim();
 
-  // Normalizamos nombres posibles de campos que puede mandar el form
-  const fullNameRaw =
-    body.full_name ??
-    body.nombre ??
-    body.name ??
-    "";
+    let telefono = "";
 
-  const phoneRaw =
-    body.phone ??
-    body.telefono_numero ??
-    body.telefono ??
-    "";
+    if (body.telefono) {
+      telefono = String(body.telefono).trim();
+    } else {
+      const cod = body.telefono_codigo
+        ? String(body.telefono_codigo).trim()
+        : "";
+      const num = body.telefono_numero
+        ? String(body.telefono_numero).trim()
+        : "";
+      telefono = (cod + " " + num).trim();
+    }
 
-  const fullName = fullNameRaw?.toString().trim();
-  const phone = phoneRaw?.toString().trim();
+    if (!nombre || !telefono) {
+      return NextResponse.json(
+        { ok: false, message: "Nombre y teléfono son obligatorios." },
+        { status: 400 }
+      );
+    }
 
-  console.log("[/api/leads] Campos normalizados:", { fullName, phone });
-
-  if (!fullName || !phone) {
-    console.warn("[/api/leads] Falta nombre o teléfono", { fullName, phone });
-    return NextResponse.json(
+    const { error } = await supabaseAdmin.from("landing_leads").insert([
       {
-        ok: false,
-        message: "Nombre y teléfono son obligatorios.",
-        debug: { fullName, phone },
+        nombre,
+        telefono,
+        email: body.email ? String(body.email).trim() : null,
+        provincia: body.provincia ? String(body.provincia).trim() : null,
+        localidad: body.localidad ? String(body.localidad).trim() : null,
+        canal: body.canal_contacto
+          ? String(body.canal_contacto).trim()
+          : null,
       },
-      { status: 400 }
-    );
-  }
-
-  const email =
-    (body.email ?? body.correo ?? body.mail ?? null) || null;
-
-  const province =
-    (body.province ?? body.provincia ?? null) || null;
-
-  const city =
-    (body.city ?? body.localidad ?? null) || null;
-
-  const vehicleInterest =
-    (body.vehicle_interest ?? body.auto_deseado ?? body.modelo_interes ?? null) || null;
-
-  // Guardamos también todo el payload original para análisis
-  const extraData = body;
-
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("leads")
-      .insert({
-        full_name: fullName,
-        phone,
-        email,
-        province,
-        city,
-        vehicle_interest: vehicleInterest,
-        extra_data: extraData,
-        source: "landing",
-        status: "new",
-      })
-      .select()
-      .single();
+    ]);
 
     if (error) {
-      console.error("[/api/leads] Error insertando lead en Supabase:", error);
+      console.error("Insert error en landing_leads:", error);
       return NextResponse.json(
-        {
-          ok: false,
-          message: "Error al guardar el lead.",
-          debug: {
-            supabase: {
-              message: error.message,
-              details: error.details,
-              hint: error.hint,
-              code: error.code,
-            },
-          },
-        },
+        { ok: false, message: "No se pudo guardar el formulario." },
         { status: 500 }
       );
     }
 
-    console.log("[/api/leads] Lead guardado correctamente:", data);
-
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("Error inesperado en POST /api/leads:", err);
     return NextResponse.json(
-      { ok: true, leadId: (data as any)?.id ?? null },
-      { status: 200 }
-    );
-  } catch (err: any) {
-    console.error("[/api/leads] Excepción no controlada:", err);
-    return NextResponse.json(
-      {
-        ok: false,
-        message: "Error inesperado al guardar el lead.",
-        debug: { error: String(err?.message ?? err) },
-      },
+      { ok: false, message: "Error inesperado." },
       { status: 500 }
     );
+  }
+}
+
+export async function GET() {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("landing_leads")
+      .select(
+        "id, nombre, email, telefono, provincia, localidad, canal, created_at"
+      )
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error("Error consultando landing_leads:", error);
+      return NextResponse.json({ leads: [] }, { status: 500 });
+    }
+
+    // Normalizamos la respuesta a lo que espera tu dashboard
+    const leads = (data ?? []).map((row) => ({
+      id: row.id,
+      nombre: row.nombre,
+      email: row.email,
+      telefono_codigo: null,
+      telefono_numero: row.telefono,
+      provincia: row.provincia,
+      localidad: row.localidad,
+      canal_contacto: row.canal,
+      created_at: row.created_at,
+    }));
+
+    return NextResponse.json({ leads });
+  } catch (err) {
+    console.error("Error inesperado en GET /api/leads:", err);
+    return NextResponse.json({ leads: [] }, { status: 500 });
   }
 }
