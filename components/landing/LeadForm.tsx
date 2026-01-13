@@ -2,277 +2,279 @@
 
 import { useState } from "react";
 
-type Status = "idle" | "loading" | "ok" | "error";
+type Status = "idle" | "loading" | "success" | "error";
 
 export default function LeadForm() {
-  const [nombre, setNombre] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [codArea, setCodArea] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [provinciaLocalidad, setProvinciaLocalidad] = useState("");
-  const [horarioDesde, setHorarioDesde] = useState("");
-  const [horarioHasta, setHorarioHasta] = useState("");
-  const [canal, setCanal] = useState("WhatsApp");
-  const [marcaInteres, setMarcaInteres] = useState("Volkswagen");
-  const [modeloInteres, setModeloInteres] = useState("");
-  const [consulta, setConsulta] = useState("");
+  const [phoneCode, setPhoneCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [contactChannel, setContactChannel] = useState("");
+  const [contactFrom, setContactFrom] = useState("");
+  const [contactTo, setContactTo] = useState("");
+  const [hasUsedCar, setHasUsedCar] = useState("");
+  const [notes, setNotes] = useState("");
+
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  const disabled = status === "loading" || status === "success";
+
+  const buildPhone = () => {
+    const code = phoneCode.trim();
+    const num = phoneNumber.trim();
+    if (code && num) return `(${code}) ${num}`;
+    if (num) return num;
+    if (code) return code;
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (status === "loading") return;
-
     setStatus("loading");
     setErrorMsg(null);
 
     try {
+      const body = {
+        // columnas principales de public.leads
+        full_name: fullName || null,
+        email: email || null,
+        phone: buildPhone(),
+        province: province || null,
+        city: city || null,
+        notes: notes || null,
+        // campos flexibles en extra_data
+        extra_data: {
+          canal_contacto: contactChannel || null,
+          horario_desde: contactFrom || null,
+          horario_hasta: contactTo || null,
+          tiene_auto_usado: hasUsedCar || null,
+        },
+      };
+
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre,
-          email: email || null,
-          telefono_codigo: codArea || null,
-          telefono_numero: telefono,
-          provincia: provinciaLocalidad || null,
-          localidad: null,
-          horario_desde: horarioDesde || null,
-          horario_hasta: horarioHasta || null,
-          canal_contacto: canal || null,
-          marca_interes: marcaInteres || null,
-          modelo_interes: modeloInteres || null,
-          mensaje: consulta || null,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "No se pudo enviar la consulta.");
+        const msg =
+          data?.message ||
+          data?.error ||
+          `No se pudo enviar el formulario (código ${res.status}).`;
+        setStatus("error");
+        setErrorMsg(msg);
+        return;
       }
 
-      setStatus("ok");
+      // ÉXITO
+      setStatus("success");
 
-      // Limpio campos principales
-      setNombre("");
+      // Limpiamos campos (si querés que queden bloqueados sin limpiar, comentá esto)
+      setFullName("");
       setEmail("");
-      setCodArea("");
-      setTelefono("");
-      setProvinciaLocalidad("");
-      setHorarioDesde("");
-      setHorarioHasta("");
-      setConsulta("");
+      setPhoneCode("");
+      setPhoneNumber("");
+      setProvince("");
+      setCity("");
+      setContactChannel("");
+      setContactFrom("");
+      setContactTo("");
+      setHasUsedCar("");
+      setNotes("");
+
+      // Disparo de conversión SOLO en éxito
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "conversion", {
+          send_to: "AW-ID_CONVERSION/ETIQUETA_CONVERSION",
+        });
+      }
     } catch (err: any) {
-      console.error("Error al enviar lead:", err);
+      console.error("Error enviando lead:", err);
       setStatus("error");
-      setErrorMsg(err?.message ?? "Ocurrió un error al enviar tu consulta.");
-    } finally {
-      setTimeout(() => setStatus("idle"), 4000);
+      setErrorMsg("Ocurrió un error al enviar el formulario.");
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 text-sm text-slate-900"
-    >
-      {/* Nombre + Email (solo nombre obligatorio) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Nombre y apellido *
-          </label>
-          <input
-            type="text"
-            required
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Juan Pérez"
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Opcional"
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
-        </div>
-      </div>
-
-      {/* Cód. área + Teléfono (ambos obligatorios) */}
-      <div className="grid grid-cols-[0.7fr_1.3fr] gap-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Cód. de área *
-          </label>
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={4}
-            required
-            value={codArea}
-            onChange={(e) => setCodArea(e.target.value)}
-            placeholder="Ej: 011"
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Teléfono / WhatsApp *
-          </label>
-          <input
-            type="tel"
-            required
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            placeholder="Ej: 1234 5678"
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          />
-        </div>
-      </div>
-
-      {/* Provincia / localidad (opcional) */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
-          Provincia / localidad
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Nombre completo */}
+      <div className="grid grid-cols-1 gap-2">
+        <label className="text-xs text-slate-700">
+          Nombre y apellido
         </label>
         <input
           type="text"
-          value={provinciaLocalidad}
-          onChange={(e) => setProvinciaLocalidad(e.target.value)}
-          placeholder="Opcional (Ej: CABA, GBA Oeste, Córdoba capital...)"
-          className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          disabled={disabled}
+          required
         />
       </div>
 
-      {/* Horarios (opcionales) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Horario desde
-          </label>
-          <select
-            value={horarioDesde}
-            onChange={(e) => setHorarioDesde(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            <option value="">Cualquiera</option>
-            <option value="09:00">09 hs</option>
-            <option value="10:00">10 hs</option>
-            <option value="11:00">11 hs</option>
-            <option value="12:00">12 hs</option>
-            <option value="15:00">15 hs</option>
-            <option value="16:00">16 hs</option>
-            <option value="17:00">17 hs</option>
-          </select>
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Horario hasta
-          </label>
-          <select
-            value={horarioHasta}
-            onChange={(e) => setHorarioHasta(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            <option value="">Cualquiera</option>
-            <option value="13:00">13 hs</option>
-            <option value="14:00">14 hs</option>
-            <option value="18:00">18 hs</option>
-            <option value="19:00">19 hs</option>
-            <option value="20:00">20 hs</option>
-          </select>
-        </div>
+      {/* Email */}
+      <div className="grid grid-cols-1 gap-2">
+        <label className="text-xs text-slate-700">Correo electrónico</label>
+        <input
+          type="email"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          disabled={disabled}
+          required
+        />
       </div>
 
-      {/* Canal + Marca + Modelo (opcionales) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Preferís que te contacten por
-          </label>
-          <select
-            value={canal}
-            onChange={(e) => setCanal(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            <option value="WhatsApp">WhatsApp</option>
-            <option value="Teléfono">Teléfono</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Marca de interés
-          </label>
-          <select
-            value={marcaInteres}
-            onChange={(e) => setMarcaInteres(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-          >
-            <option value="Volkswagen">Volkswagen</option>
-            <option value="Chevrolet">Chevrolet</option>
-            <option value="Fiat">Fiat</option>
-            <option value="Peugeot">Peugeot</option>
-            <option value="Renault">Renault</option>
-            <option value="Otra">Otra</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">
-            Modelo de interés
+      {/* Teléfono */}
+      <div className="grid grid-cols-1 md:grid-cols-[0.8fr_1.2fr] gap-3">
+        <div className="space-y-2">
+          <label className="text-xs text-slate-700">
+            Código de área
           </label>
           <input
-            type="text"
-            value={modeloInteres}
-            onChange={(e) => setModeloInteres(e.target.value)}
-            placeholder="Opcional (Polo, T-Cross, etc.)"
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            type="tel"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={phoneCode}
+            onChange={(e) => setPhoneCode(e.target.value)}
+            disabled={disabled}
+            placeholder="11"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs text-slate-700">
+            Teléfono / WhatsApp
+          </label>
+          <input
+            type="tel"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            disabled={disabled}
+            required
           />
         </div>
       </div>
 
-      {/* Consulta (opcional) */}
-      <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">
-          Tu consulta
+      {/* Provincia y localidad */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <label className="text-xs text-slate-700">Provincia</label>
+          <input
+            type="text"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={province}
+            onChange={(e) => setProvince(e.target.value)}
+            disabled={disabled}
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs text-slate-700">Localidad</label>
+          <input
+            type="text"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            disabled={disabled}
+          />
+        </div>
+      </div>
+
+      {/* Canal de contacto */}
+      <div className="space-y-2">
+        <label className="text-xs text-slate-700">
+          ¿Cómo preferís que te contacten?
+        </label>
+        <select
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+          value={contactChannel}
+          onChange={(e) => setContactChannel(e.target.value)}
+          disabled={disabled}
+        >
+          <option value="">Seleccionar</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="telefono">Llamada telefónica</option>
+          <option value="email">Correo electrónico</option>
+        </select>
+      </div>
+
+      {/* Horario de contacto */}
+      <div className="space-y-2">
+        <label className="text-xs text-slate-700">
+          Horario preferido de contacto
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="time"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={contactFrom}
+            onChange={(e) => setContactFrom(e.target.value)}
+            disabled={disabled}
+          />
+          <input
+            type="time"
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+            value={contactTo}
+            onChange={(e) => setContactTo(e.target.value)}
+            disabled={disabled}
+          />
+        </div>
+      </div>
+
+      {/* Auto usado */}
+      <div className="space-y-2">
+        <label className="text-xs text-slate-700">
+          ¿Tenés auto usado para entregar como parte de pago?
+        </label>
+        <select
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+          value={hasUsedCar}
+          onChange={(e) => setHasUsedCar(e.target.value)}
+          disabled={disabled}
+        >
+          <option value="">Seleccionar</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      {/* Comentarios */}
+      <div className="space-y-2">
+        <label className="text-xs text-slate-700">
+          Comentarios adicionales (opcional)
         </label>
         <textarea
-          rows={3}
-          value={consulta}
-          onChange={(e) => setConsulta(e.target.value)}
-          placeholder="Opcional: contanos qué estás buscando (0km, financiación, entrega, etc.)."
-          className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500 min-h-[80px]"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          disabled={disabled}
         />
       </div>
 
-      {/* Mensajes de estado */}
-      {status === "ok" && (
-        <p className="text-xs text-emerald-600">
-          ¡Listo! Reservaste tu cupo. Un asesor te va a contactar a la brevedad.
-        </p>
-      )}
-      {status === "error" && (
-        <p className="text-xs text-red-600">
-          {errorMsg || "No se pudo guardar tu cupo. Intentá nuevamente."}
+      {/* Botón */}
+      <button
+        type="submit"
+        disabled={disabled}
+        className="w-full mt-2 rounded-full bg-sky-600 hover:bg-sky-500 disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium py-2.5 transition-colors"
+      >
+        {status === "loading" ? "Enviando..." : "Enviar consulta"}
+      </button>
+
+      {/* Mensaje de éxito inline */}
+      {status === "success" && (
+        <p className="mt-2 text-sm text-emerald-600">
+          ¡Listo! Ya recibimos tus datos; en breve te contactamos.
         </p>
       )}
 
-      {/* Botón principal */}
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        className="mt-1 inline-flex w-full items-center justify-center rounded-full bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(37,99,235,0.45)] hover:bg-sky-700 disabled:cursor-not-allowed disabled:bg-sky-400"
-      >
-        {status === "loading" ? "Guardando..." : "Reservar mi cupo ahora"}
-      </button>
+      {/* Mensaje de error */}
+      {status === "error" && errorMsg && (
+        <p className="mt-2 text-sm text-red-500">{errorMsg}</p>
+      )}
     </form>
   );
 }
