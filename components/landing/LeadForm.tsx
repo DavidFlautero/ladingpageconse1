@@ -13,7 +13,7 @@ export default function LeadForm() {
   const [city, setCity] = useState("");
   const [contactChannel, setContactChannel] = useState("");
   const [contactFrom, setContactFrom] = useState("");
-  const [contactTo, setContactTo] = useState("");
+  const [contactTo, setContactTo] = useState(""); // se mantiene para no romper el payload
   const [hasUsedCar, setHasUsedCar] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -48,7 +48,7 @@ export default function LeadForm() {
         // campos flexibles en extra_data
         extra_data: {
           canal_contacto: contactChannel || null,
-          horario_desde: contactFrom || null,
+          horario_desde: contactFrom || null, // ahora: mañana / tarde / noche
           horario_hasta: contactTo || null,
           tiene_auto_usado: hasUsedCar || null,
         },
@@ -74,7 +74,7 @@ export default function LeadForm() {
       // ÉXITO
       setStatus("success");
 
-      // Limpiamos campos (si querés que queden bloqueados sin limpiar, comentá esto)
+      // Limpiamos campos
       setFullName("");
       setEmail("");
       setPhoneCode("");
@@ -104,9 +104,6 @@ export default function LeadForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Nombre completo */}
       <div className="grid grid-cols-1 gap-2">
-        <label className="text-xs text-slate-700">
-          Nombre y apellido
-        </label>
         <input
           type="text"
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
@@ -114,12 +111,12 @@ export default function LeadForm() {
           onChange={(e) => setFullName(e.target.value)}
           disabled={disabled}
           required
+          placeholder="Nombre y apellido"
         />
       </div>
 
       {/* Email */}
       <div className="grid grid-cols-1 gap-2">
-        <label className="text-xs text-slate-700">Correo electrónico</label>
         <input
           type="email"
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
@@ -127,28 +124,23 @@ export default function LeadForm() {
           onChange={(e) => setEmail(e.target.value)}
           disabled={disabled}
           required
+          placeholder="Correo electrónico"
         />
       </div>
 
       {/* Teléfono */}
       <div className="grid grid-cols-1 md:grid-cols-[0.8fr_1.2fr] gap-3">
         <div className="space-y-2">
-          <label className="text-xs text-slate-700">
-            Código de área
-          </label>
           <input
             type="tel"
             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
             value={phoneCode}
             onChange={(e) => setPhoneCode(e.target.value)}
             disabled={disabled}
-            placeholder="11"
+            placeholder="Código de área (ej: 11)"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs text-slate-700">
-            Teléfono / WhatsApp
-          </label>
           <input
             type="tel"
             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
@@ -156,6 +148,7 @@ export default function LeadForm() {
             onChange={(e) => setPhoneNumber(e.target.value)}
             disabled={disabled}
             required
+            placeholder="Teléfono / WhatsApp"
           />
         </div>
       </div>
@@ -163,80 +156,68 @@ export default function LeadForm() {
       {/* Provincia y localidad */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="space-y-2">
-          <label className="text-xs text-slate-700">Provincia</label>
           <input
             type="text"
             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
             value={province}
             onChange={(e) => setProvince(e.target.value)}
             disabled={disabled}
+            placeholder="Provincia"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs text-slate-700">Localidad</label>
           <input
             type="text"
             className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             disabled={disabled}
+            placeholder="Localidad"
           />
         </div>
       </div>
 
       {/* Canal de contacto */}
       <div className="space-y-2">
-        <label className="text-xs text-slate-700">
-          ¿Cómo preferís que te contacten?
-        </label>
         <select
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
           value={contactChannel}
           onChange={(e) => setContactChannel(e.target.value)}
           disabled={disabled}
         >
-          <option value="">Seleccionar</option>
+          <option value="">¿Cómo preferís que te contacten?</option>
           <option value="whatsapp">WhatsApp</option>
           <option value="telefono">Llamada telefónica</option>
           <option value="email">Correo electrónico</option>
         </select>
       </div>
 
-      {/* Horario de contacto */}
+      {/* Horario de contacto: mañana / tarde / noche */}
       <div className="space-y-2">
-        <label className="text-xs text-slate-700">
-          Horario preferido de contacto
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          <input
-            type="time"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
-            value={contactFrom}
-            onChange={(e) => setContactFrom(e.target.value)}
-            disabled={disabled}
-          />
-          <input
-            type="time"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
-            value={contactTo}
-            onChange={(e) => setContactTo(e.target.value)}
-            disabled={disabled}
-          />
-        </div>
+        <select
+          className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
+          value={contactFrom}
+          onChange={(e) => setContactFrom(e.target.value)}
+          disabled={disabled}
+        >
+          <option value="">Horario preferido de contacto</option>
+          <option value="mañana">Mañana</option>
+          <option value="tarde">Tarde</option>
+          <option value="noche">Noche</option>
+        </select>
       </div>
 
       {/* Auto usado */}
       <div className="space-y-2">
-        <label className="text-xs text-slate-700">
-          ¿Tenés auto usado para entregar como parte de pago?
-        </label>
         <select
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500"
           value={hasUsedCar}
           onChange={(e) => setHasUsedCar(e.target.value)}
           disabled={disabled}
         >
-          <option value="">Seleccionar</option>
+          <option value="">
+            ¿Tenés auto usado para entregar como parte de pago?
+          </option>
           <option value="si">Sí</option>
           <option value="no">No</option>
         </select>
@@ -244,14 +225,12 @@ export default function LeadForm() {
 
       {/* Comentarios */}
       <div className="space-y-2">
-        <label className="text-xs text-slate-700">
-          Comentarios adicionales (opcional)
-        </label>
         <textarea
           className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-sky-500 min-h-[80px]"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           disabled={disabled}
+          placeholder="Comentarios adicionales (opcional)"
         />
       </div>
 
