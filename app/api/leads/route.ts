@@ -1,23 +1,38 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function POST(req: Request) {
+// POST: guardar lead en landing_leads
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Aceptamos distintas formas de venir los datos
-    const nombre: string = (
+    console.log("[/api/leads] Body recibido:", body);
+
+    // NOMBRE: aceptamos varios nombres posibles
+    const nombreRaw =
       body.nombre ??
       body.full_name ??
-      ""
-    )
-      .toString()
-      .trim();
+      body.nombre_completo ??
+      body.name ??
+      "";
 
+    const nombre = nombreRaw?.toString().trim();
+
+    // TELEFONO: aceptamos muchas variantes
     let telefono = "";
 
-    if (body.telefono) {
-      telefono = String(body.telefono).trim();
+    const candidatosTelefono = [
+      body.telefono,
+      body.telefono_numero,
+      body.telefonoNumero,
+      body.celular,
+      body.phone,
+      body.whatsapp,
+      body.telefono_whatsapp,
+    ].filter((v: any) => !!v && String(v).trim() !== "");
+
+    if (candidatosTelefono.length > 0) {
+      telefono = String(candidatosTelefono[0]).trim();
     } else {
       const cod = body.telefono_codigo
         ? String(body.telefono_codigo).trim()
@@ -28,33 +43,72 @@ export async function POST(req: Request) {
       telefono = (cod + " " + num).trim();
     }
 
+    console.log("[/api/leads] Normalizado:", { nombre, telefono });
+
     if (!nombre || !telefono) {
+      console.warn(
+        "[/api/leads] Falta nombre o teléfono después de normalizar",
+        { nombre, telefono }
+      );
       return NextResponse.json(
         { ok: false, message: "Nombre y teléfono son obligatorios." },
         { status: 400 }
       );
     }
 
+    const email = body.email
+      ? String(body.email).trim()
+      : body.correo
+      ? String(body.correo).trim()
+      : null;
+
+    const provincia = body.provincia
+      ? String(body.provincia).trim()
+      : body.province
+      ? String(body.province).trim()
+      : null;
+
+    const localidad = body.localidad
+      ? String(body.localidad).trim()
+      : body.city
+      ? String(body.city).trim()
+      : null;
+
+    const canal = body.canal_contacto
+      ? String(body.canal_contacto).trim()
+      : body.canal
+      ? String(body.canal).trim()
+      : null;
+
     const { error } = await supabaseAdmin.from("landing_leads").insert([
       {
         nombre,
         telefono,
-        email: body.email ? String(body.email).trim() : null,
-        provincia: body.provincia ? String(body.provincia).trim() : null,
-        localidad: body.localidad ? String(body.localidad).trim() : null,
-        canal: body.canal_contacto
-          ? String(body.canal_contacto).trim()
-          : null,
+        email,
+        provincia,
+        localidad,
+        canal,
       },
     ]);
 
     if (error) {
       console.error("Insert error en landing_leads:", error);
       return NextResponse.json(
-        { ok: false, message: "No se pudo guardar el formulario." },
+        {
+          ok: false,
+          message: "No se pudo guardar el formulario.",
+          supabaseError: {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+          },
+        },
         { status: 500 }
       );
     }
+
+    console.log("[/api/leads] Lead guardado OK en landing_leads");
 
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -66,6 +120,7 @@ export async function POST(req: Request) {
   }
 }
 
+// GET: listar últimos leads para el panel
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
@@ -81,8 +136,7 @@ export async function GET() {
       return NextResponse.json({ leads: [] }, { status: 500 });
     }
 
-    // Normalizamos la respuesta a lo que espera tu dashboard
-    const leads = (data ?? []).map((row) => ({
+    const leads = (data ?? []).map((row: any) => ({
       id: row.id,
       nombre: row.nombre,
       email: row.email,
