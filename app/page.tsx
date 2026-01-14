@@ -4,6 +4,7 @@ import LeadForm from "@/components/landing/LeadForm";
 import AnnouncementBar from "@/components/landing/AnnouncementBar";
 import EntryModal from "@/components/landing/EntryModal";
 import FloatingActions from "@/components/landing/FloatingActions";
+import VehiclesSection from "@/components/landing/VehiclesSection";
 import { getWhatsappNumber } from "@/lib/config";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
@@ -161,63 +162,14 @@ export default async function LandingPage() {
           <h2 className="text-xl md:text-2xl font-semibold mb-2 text-slate-900">
             Autos alcanzados por el beneficio
           </h2>
-          <p className="text-sm text-slate-600 mb-6 max-w-2xl">
-            
-          </p>
+          <p className="text-sm text-slate-600 mb-6 max-w-2xl"></p>
 
           {sectionsConAutos.length === 0 ? (
             <p className="text-sm text-slate-500">
-          
+              En este momento no hay modelos disponibles para mostrar.
             </p>
           ) : (
-            <div className="space-y-8">
-              {sectionsConAutos.map((section) => (
-                <div key={section.id}>
-                  <h3 className="text-base font-semibold text-slate-900 mb-3">
-                    {section.title}
-                  </h3>
-
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {section.vehicles.map((v) => (
-                      <a
-                        key={v.id}
-                        href="#form"
-                        className="rounded-2xl border border-slate-200 bg-white overflow-hidden flex flex-col hover:shadow-[0_16px_40px_rgba(15,23,42,0.20)] hover:-translate-y-0.5 transition"
-                      >
-                        {v.imagen_url && (
-                          <div className="aspect-[4/3] w-full overflow-hidden">
-                            <img
-                              src={v.imagen_url}
-                              alt={`${section.title} ${v.title}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
-
-                        <div className="p-4 flex flex-col gap-1">
-                          <h4 className="text-sm font-semibold text-slate-900">
-                            {section.title} {v.title}
-                          </h4>
-                          {v.cuota_desde != null && (
-                            <p className="text-sm text-slate-700">
-                              <span className="font-semibold">
-                                Cuotas desde{" "}
-                              </span>
-                              <span className="font-semibold">
-                                {v.moneda === "ARS" ? "$" : ""}
-                                {new Intl.NumberFormat("es-AR").format(
-                                  Number(v.cuota_desde)
-                                )}
-                              </span>
-                            </p>
-                          )}
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <VehiclesSection sections={sectionsConAutos} />
           )}
         </div>
       </section>
