@@ -157,9 +157,10 @@ export default function VehiclesSection({ sections }: Props) {
                 />
               )}
               <p className="text-xs text-gray-500">
-                Completá tus datos y un asesor te va a contactar, principalmente
-                por WhatsApp, para confirmar la disponibilidad y condiciones del
-                plan para este modelo.
+                Llená tus datos para reservar tu cupo en el plan y poder
+                acreditar tus beneficios para este modelo. Un asesor te va a
+                contactar principalmente por WhatsApp para confirmar los
+                próximos pasos.
               </p>
             </div>
 

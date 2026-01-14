@@ -205,6 +205,91 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+	        {/* FOOTER LEGAL */}
+      <footer className="border-t border-slate-200 bg-[#f3f1eb]">
+        <div className="max-w-5xl mx-auto px-6 md:px-10 lg:px-20 py-8 md:py-10 text-[11px] md:text-xs text-slate-600 space-y-4">
+          <div className="space-y-2">
+            <p>
+              Las imágenes y descripciones exhibidas en este sitio tienen fines
+              publicitarios y son meramente ilustrativas, no contractuales. Los
+              valores indicados son orientativos y no representan una oferta
+              comercial directa. Los precios, bonificaciones y condiciones
+              pueden variar según fabricante, disponibilidad o concesionario.
+            </p>
+            <p className="font-semibold">
+              Última actualización: 07/01/2026.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <p className="font-semibold">
+              PlanNacionalTu0km.com.ar – Naturaleza del servicio
+            </p>
+            <p>
+              PlanNacionalTu0km.com.ar es una plataforma privada de asesoría y
+              derivación de consultas. NO pertenece ni está afiliada al Estado
+              Nacional, Gobierno, ministerios, secretarías ni a ningún organismo
+              oficial de la República Argentina.
+            </p>
+            <p>
+              PlanNacionalTu0km.com.ar NO cuenta con vendedores, representantes
+              ni oficinas de atención al público en ninguna parte del país. No
+              poseemos otros sitios web, sucursales, cuentas de WhatsApp ni
+              dominios adicionales fuera del presente.
+            </p>
+            <p>
+              PlanNacionalTu0km.com.ar NO realiza venta directa, no administra
+              grupos de ahorro, no suscribe contratos, no gestiona cobranzas, no
+              adjudica unidades y no garantiza bonificaciones ni tiempos de
+              entrega.
+            </p>
+            <p>
+              Los planes de ahorro y operaciones comerciales son realizados
+              exclusivamente por Concesionarios Oficiales de cada marca, quienes
+              poseen la autorización para la comercialización, publicación y
+              suscripción de los planes correspondientes. Toda transacción final
+              se realiza directamente entre el usuario y el concesionario. Al
+              completar el formulario, el usuario autoriza el uso de sus datos
+              para contacto y pre-evaluación por parte de dichos concesionarios.
+            </p>
+            <p className="font-semibold">
+              PlanNacionalTu0km.com.ar es un sitio completamente independiente y
+              no tiene relación ni vinculación alguna con plannacional.autos ni
+              con sus operadores.
+            </p>
+          </div>
+
+          <div className="pt-2 border-t border-slate-200/70 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              <a href="#" className="hover:text-slate-900 underline-offset-2 hover:underline">
+                Privacidad
+              </a>
+              <span>/</span>
+              <a href="#" className="hover:text-slate-900 underline-offset-2 hover:underline">
+                Políticas de uso
+              </a>
+              <span>/</span>
+              <a href="#" className="hover:text-slate-900 underline-offset-2 hover:underline">
+                Preguntas frecuentes
+              </a>
+              <span>/</span>
+              <a href="#" className="hover:text-slate-900 underline-offset-2 hover:underline">
+                Opiniones y comentarios
+              </a>
+            </div>
+
+            <div>
+              <a
+                href="#form"
+                className="font-medium text-sky-700 hover:text-sky-900 underline-offset-2 hover:underline"
+              >
+                ¿Sos concesionario oficial? Publicá tu oferta en el sitio
+              </a>
+            </div>
+          </div>
+        </div>
+      </footer>
+
     </main>
   );
 }
