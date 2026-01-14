@@ -130,7 +130,7 @@ export default function VehiclesSection({ sections }: Props) {
             </button>
 
             {/* header */}
-            <div className="mb-3 pr-7">
+            <div className="mb-2 pr-7">
               <h2 className="text-lg font-semibold text-gray-900">
                 Reservá tu cupo
               </h2>
@@ -148,7 +148,7 @@ export default function VehiclesSection({ sections }: Props) {
             </div>
 
             {/* mini foto + texto */}
-            <div className="flex gap-3 mb-4">
+            <div className="flex gap-3 mb-3">
               {selected.vehicle.imagen_url && (
                 <img
                   src={selected.vehicle.imagen_url}
@@ -157,15 +157,14 @@ export default function VehiclesSection({ sections }: Props) {
                 />
               )}
               <p className="text-xs text-gray-500">
-                Llená tus datos para reservar tu cupo en el plan y poder
-                acreditar tus beneficios para este modelo. Un asesor te va a
-                contactar principalmente por WhatsApp para confirmar los
-                próximos pasos.
+                Llená tus datos para reservar tu cupo en el plan para este
+                modelo. Un asesor te va a contactar principalmente por WhatsApp
+                para confirmar los próximos pasos.
               </p>
             </div>
 
-            {/* formulario de lead existente */}
-            <div className="border-t border-slate-200 pt-3">
+            {/* formulario de lead existente, pegado al texto */}
+            <div className="mt-1">
               <LeadForm />
             </div>
           </div>
