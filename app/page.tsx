@@ -12,7 +12,7 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 export const dynamic = "force-dynamic";
 
 function buildWhatsAppUrl(rawNumber?: string | null) {
-  const fallback = "5491112345678";
+  const fallback = "541136706858";
   const clean =
     rawNumber && rawNumber.trim().length > 5
       ? rawNumber.replace(/\D/g, "")
