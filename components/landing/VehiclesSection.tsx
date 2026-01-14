@@ -110,8 +110,16 @@ export default function VehiclesSection({ sections }: Props) {
 
       {/* Modal de reserva */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-2 sm:px-4">
+          <div
+            className="
+              w-full max-w-sm sm:max-w-md md:max-w-lg
+              rounded-2xl bg-white shadow-xl relative
+              p-4 sm:p-5
+              max-h-[85vh] md:max-h-[70vh]
+              overflow-y-auto
+            "
+          >
             {/* botón cerrar */}
             <button
               type="button"
@@ -122,7 +130,7 @@ export default function VehiclesSection({ sections }: Props) {
             </button>
 
             {/* header */}
-            <div className="mb-3 pr-6">
+            <div className="mb-3 pr-7">
               <h2 className="text-lg font-semibold text-gray-900">
                 Reservá tu cupo
               </h2>
@@ -145,12 +153,13 @@ export default function VehiclesSection({ sections }: Props) {
                 <img
                   src={selected.vehicle.imagen_url}
                   alt={`${selected.sectionTitle} ${selected.vehicle.title}`}
-                  className="h-20 w-32 rounded-lg object-cover"
+                  className="h-16 w-24 sm:h-20 sm:w-32 rounded-lg object-cover"
                 />
               )}
               <p className="text-xs text-gray-500">
-                Completá tus datos y un asesor te va a contactar para confirmar
-                la disponibilidad y condiciones del plan para este modelo.
+                Completá tus datos y un asesor te va a contactar, principalmente
+                por WhatsApp, para confirmar la disponibilidad y condiciones del
+                plan para este modelo.
               </p>
             </div>
 
