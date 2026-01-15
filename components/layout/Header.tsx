@@ -19,7 +19,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
           {/* LINK LOGIN */}
           <Link
-            href="/login"
+            href="/admin/login"
             className="text-[13px] font-medium text-slate-600 hover:text-slate-900 underline-offset-4 hover:underline"
           >
             Ingresar
