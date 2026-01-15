@@ -7,6 +7,8 @@ import FloatingActions from "@/components/landing/FloatingActions";
 import VehiclesSection from "@/components/landing/VehiclesSection";
 import { getWhatsappNumber } from "@/lib/config";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import VisitTracker from "@/components/landing/VisitTracker";
+
 
 // Fuerza que esta página sea dinámica (sin HTML cacheado)
 export const dynamic = "force-dynamic";

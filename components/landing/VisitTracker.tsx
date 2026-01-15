@@ -1,41 +1,19 @@
-import Link from "next/link";
-import Header from "@/components/layout/Header";
-import LeadForm from "@/components/landing/LeadForm";
-import VehiclesGrid from "@/components/landing/VehiclesGrid";
-import AnnouncementBar from "@/components/landing/AnnouncementBar";
-import EntryModal from "@/components/landing/EntryModal";
-import FloatingActions from "@/components/landing/FloatingActions";
-import { getWhatsappNumber } from "@/lib/config";
-import VisitTracker from "@/components/landing/VisitTracker"; // 👈 agrega esta línea
+"use client";
 
-function buildWhatsAppUrl(rawNumber?: string | null) {
-  const fallback = "5491112345678";
-  const clean =
-    rawNumber && rawNumber.trim().length > 5
-      ? rawNumber.replace(/\D/g, "")
-      : fallback;
+import { useEffect } from "react";
 
-  return `https://wa.me/${clean}`;
-}
+export default function VisitTracker() {
+  useEffect(() => {
+    // Registramos una visita al cargar el cliente
+    fetch("/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "visit" }),
+    }).catch(() => {
+      // No rompemos la UI si falla
+    });
+  }, []);
 
-export default async function LandingPage() {
-  const whatsappNumber = await getWhatsappNumber();
-  const whatsappUrl = buildWhatsAppUrl(whatsappNumber);
-
-  // Más adelante vendrá desde Supabase
-  const vehicles: any[] = [];
-
-  return (
-    <main className="min-h-screen bg-[#f3f1eb] text-slate-900">
-      {/* 👇 registra la visita apenas se monta la página */}
-      <VisitTracker />
-
-      <Header />
-      <AnnouncementBar />
-      <EntryModal />
-      <FloatingActions whatsappUrl={whatsappUrl} />
-
-      {/* ... resto de tu código igual ... */}
-    </main>
-  );
+  // No renderiza nada, solo dispara el evento
+  return null;
 }
