@@ -22,8 +22,15 @@ type Metrics = {
   recent: Lead[];
 };
 
+type VisitMetrics = {
+  today: number;
+  last7d: number;
+  last30d: number;
+};
+
 export default function DashboardPage() {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [visitMetrics, setVisitMetrics] = useState<VisitMetrics | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -43,14 +50,30 @@ export default function DashboardPage() {
 
   async function load() {
     try {
-      const r = await fetch("/api/dashboard", { cache: "no-store" });
-      const data = (await r.json()) as Metrics;
+      const [rDashboard, rVisits] = await Promise.all([
+        fetch("/api/dashboard", { cache: "no-store" }),
+        fetch("/api/visits-metrics", { cache: "no-store" }),
+      ]);
+
+      const data = (await rDashboard.json()) as Metrics;
+
       setMetrics({
         visits: data.visits ?? 0,
         leads: data.leads ?? 0,
         conversion: data.conversion ?? 0,
         recent: data.recent ?? [],
       });
+
+      if (rVisits.ok) {
+        const v = await rVisits.json();
+        setVisitMetrics({
+          today: v.today ?? 0,
+          last7d: v.last7d ?? 0,
+          last30d: v.last30d ?? 0,
+        });
+      } else {
+        setVisitMetrics(null);
+      }
     } catch (e) {
       console.error("Error cargando métricas:", e);
     } finally {
@@ -324,19 +347,29 @@ export default function DashboardPage() {
   }
 
   // NUEVAS TARJETAS: leads nuevos y en seguimiento
-  const leadsNuevos =
-    metrics.recent?.filter((l) => !l.visto)?.length ?? 0;
+  const leadsNuevos = metrics.recent?.filter((l) => !l.visto)?.length ?? 0;
   const leadsEnSeguimiento =
     metrics.recent?.filter(
       (l) => (l.seguimiento ?? "").toString().trim() !== ""
     ).length ?? 0;
 
+  const visitasHoy = visitMetrics?.today ?? 0;
+  const visitas7d = visitMetrics?.last7d ?? 0;
+  const visitas30d = visitMetrics?.last30d ?? 0;
+
   return (
     <div className="space-y-6">
-      {/* TARJETAS DE LEADS (no más visitas / conversión inventada) */}
+      {/* TARJETAS DE LEADS */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card title="Leads nuevos" value={leadsNuevos} />
         <Card title="Leads en seguimiento" value={leadsEnSeguimiento} />
+      </section>
+
+      {/* TARJETAS DE VISITAS */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card title="Visitas hoy" value={visitasHoy} />
+        <Card title="Visitas últimos 7 días" value={visitas7d} />
+        <Card title="Visitas últimos 30 días" value={visitas30d} />
       </section>
 
       {/* ULTIMOS LEADS */}
