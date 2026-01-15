@@ -1,37 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const { type, leadId, vehicleId } = body || {};
+    const body = await req.json().catch(() => ({}));
+    const { type } = body as { type?: string };
 
     if (!type) {
       return NextResponse.json(
-        { error: "Tipo de evento requerido." },
+        { error: "type es obligatorio" },
         { status: 400 }
       );
     }
 
-    const { error } = await supabaseAdmin.from("events").insert({
-      type,
-      lead_id: leadId ?? null,
-      vehicle_id: vehicleId ?? null,
-    });
+    // Guardamos SIEMPRE el evento en landing_events
+    const { error } = await supabaseAdmin
+      .from("landing_events")
+      .insert({ event_type: type });
 
     if (error) {
-      console.error("Error insertando event:", error);
+      console.error("[/api/events] Error insertando en landing_events:", error);
       return NextResponse.json(
-        { error: "No se pudo registrar el evento." },
+        { error: error.message },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Error en /api/events:", err);
+    console.error("[/api/events] Error inesperado:", err);
     return NextResponse.json(
-      { error: "Error interno registrando el evento." },
+      { error: "Error inesperado" },
       { status: 500 }
     );
   }
