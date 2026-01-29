@@ -8,39 +8,66 @@ export async function POST(req: Request) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "No se recibió ningún archivo" },
+        { error: "No se recibió ningún archivo." },
+        { status: 400 }
+      );
+    }
+
+    // Validaciones básicas (profesional)
+    const maxMb = 8;
+    const maxBytes = maxMb * 1024 * 1024;
+    if (file.size > maxBytes) {
+      return NextResponse.json(
+        { error: `El archivo supera el máximo permitido (${maxMb}MB).` },
+        { status: 400 }
+      );
+    }
+
+    // Opcional: limitar tipos
+    const allowed = ["image/jpeg", "image/png", "image/webp"];
+    if (file.type && !allowed.includes(file.type)) {
+      return NextResponse.json(
+        { error: "Formato no soportado. Usá JPG, PNG o WEBP." },
         { status: 400 }
       );
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const filename = `config/${Date.now()}-${file.name}`;
+
+    // Sanitizar nombre
+    const safeName = file.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9.\-_]/g, "");
+
+    // Bucket profesional para vehículos
+    const path = `autos/${Date.now()}-${safeName}`;
 
     const { data, error } = await supabaseAdmin.storage
-      .from("public-assets")
-      .upload(filename, buffer, {
-        contentType: file.type,
+      .from("vehicle-images")
+      .upload(path, buffer, {
+        contentType: file.type || "application/octet-stream",
         upsert: false,
       });
 
     if (error) {
-      console.error("Error subiendo imagen:", error);
+      console.error("Error subiendo imagen (vehicle-images):", error);
       return NextResponse.json(
-        { error: "Error al subir la imagen" },
+        { error: "Error al subir la imagen." },
         { status: 500 }
       );
     }
 
-    const publicUrl =
-      supabaseAdmin.storage.from("public-assets").getPublicUrl(data.path)
-        .data.publicUrl;
+    const publicUrl = supabaseAdmin.storage
+      .from("vehicle-images")
+      .getPublicUrl(data.path).data.publicUrl;
 
-    return NextResponse.json({ url: publicUrl });
+    return NextResponse.json({ url: publicUrl, path: data.path });
   } catch (e: any) {
-    console.error("Excepción en /api/upload-image:", e);
+    console.error("Excepción en /api/upload-vehicle-image:", e);
     return NextResponse.json(
-      { error: "Error inesperado al subir la imagen" },
+      { error: "Error inesperado al subir la imagen." },
       { status: 500 }
     );
   }
