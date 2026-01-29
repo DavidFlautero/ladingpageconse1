@@ -1,8 +1,24 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+function supabaseGuard() {
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+      },
+      { status: 500 }
+    );
+  }
+  return null;
+}
+
 export async function GET() {
-  const { data, error } = await supabaseAdmin
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
+  const { data, error } = await supabaseAdmin!
     .from("admin_profile")
     .select("id, nombre, email, telefono, avatar_url")
     .order("id", { ascending: true })
@@ -18,6 +34,9 @@ export async function GET() {
 }
 
 export async function PUT(req: Request) {
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
   const body = await req.json();
 
   const payload = {
@@ -28,7 +47,7 @@ export async function PUT(req: Request) {
     avatar_url: body.avatar_url || null,
   };
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin!
     .from("admin_profile")
     .upsert(payload, { onConflict: "id" })
     .select()
