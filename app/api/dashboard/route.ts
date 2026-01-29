@@ -6,7 +6,21 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
  * Devuelve métricas básicas + últimos leads desde landing_leads.
  */
 export async function GET() {
-  const { data, error, count } = await supabaseAdmin
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+        visits: 0,
+        leads: 0,
+        conversion: 0,
+        recent: [],
+      },
+      { status: 500 }
+    );
+  }
+
+  const { data, error, count } = await supabaseAdmin!
     .from("landing_leads")
     .select("*", { count: "exact" })
     .order("created_at", { ascending: false })
@@ -51,6 +65,16 @@ export async function GET() {
  *  - type = "delete_lead": borrar lead
  */
 export async function POST(req: NextRequest) {
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+      },
+      { status: 500 }
+    );
+  }
+
   const body = await req.json();
 
   if (body.type === "update_lead") {
@@ -82,7 +106,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from("landing_leads")
       .update(update)
       .eq("id", id)
@@ -99,7 +123,7 @@ export async function POST(req: NextRequest) {
 
     const adapted = {
       ...data,
-      telefono_numero: data.telefono_numero ?? data.telefono ?? "",
+      telefono_numero: (data as any).telefono_numero ?? (data as any).telefono ?? "",
     };
 
     return NextResponse.json({ lead: adapted });
@@ -115,7 +139,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabaseAdmin!
       .from("landing_leads")
       .delete()
       .eq("id", id);
