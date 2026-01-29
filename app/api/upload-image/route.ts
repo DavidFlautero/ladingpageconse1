@@ -3,6 +3,17 @@ import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 export async function POST(req: Request) {
   try {
+    // ✅ Evita que el build/deploy explote si faltan env vars (supabaseAdmin = null)
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        {
+          error:
+            "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -36,7 +47,7 @@ export async function POST(req: Request) {
     const buffer = Buffer.from(arrayBuffer);
 
     // Sanitizar nombre
-    const safeName = file.name
+    const safeName = (file.name || "image")
       .toLowerCase()
       .replace(/\s+/g, "-")
       .replace(/[^a-z0-9.\-_]/g, "");
