@@ -12,7 +12,20 @@ function daysAgo(n: number): Date {
 }
 
 export async function GET() {
-  const supabase = supabaseAdmin;
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+        today: 0,
+        last7d: 0,
+        last30d: 0,
+      },
+      { status: 500 }
+    );
+  }
+
+  const supabase = supabaseAdmin!;
 
   const todayStart = startOfToday();
   const last7dStart = daysAgo(7);
