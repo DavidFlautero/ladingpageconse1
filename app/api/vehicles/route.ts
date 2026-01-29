@@ -2,10 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type VehicleImageInput = {
-  url?: string | null;      // URL pública
-  path?: string | null;     // autos/xxxx.jpg (recomendado)
+  url?: string | null; // URL pública
+  path?: string | null; // autos/xxxx.jpg (recomendado)
   position?: number | null; // 1..4
 };
+
+function supabaseGuard() {
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+      },
+      { status: 500 }
+    );
+  }
+  return null;
+}
 
 function normalizeSlug(title: string) {
   return title
@@ -66,12 +79,22 @@ async function removeStoragePaths(paths: string[]) {
   const unique = Array.from(new Set(paths.filter(Boolean)));
   if (!unique.length) return { ok: true as const };
 
-  const { error } = await supabaseAdmin.storage
+  if (!supabaseAdmin) {
+    return {
+      ok: false as const,
+      error: new Error("Supabase envs faltantes."),
+    };
+  }
+
+  const { error } = await supabaseAdmin!.storage
     .from("vehicle-images")
     .remove(unique);
 
   if (error) {
-    console.error("Error removiendo archivos en Storage (vehicle-images):", error);
+    console.error(
+      "Error removiendo archivos en Storage (vehicle-images):",
+      error
+    );
     return { ok: false as const, error };
   }
 
@@ -79,8 +102,11 @@ async function removeStoragePaths(paths: string[]) {
 }
 
 export async function GET() {
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
   // Trae secciones con vehículos y sus imágenes (tabla vehicle_images)
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabaseAdmin!
     .from("vehicle_sections")
     .select(
       `
@@ -128,7 +154,8 @@ export async function GET() {
       vehicle_images: (v.vehicle_images ?? [])
         .slice()
         .sort(
-          (a: any, b: any) => Number(a.position ?? 999) - Number(b.position ?? 999)
+          (a: any, b: any) =>
+            Number(a.position ?? 999) - Number(b.position ?? 999)
         ),
     })),
   }));
@@ -137,6 +164,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
   const body: any = await req.json();
 
   // --------------------------
@@ -153,7 +183,7 @@ export async function POST(req: NextRequest) {
 
     const slug = normalizeSlug(title);
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from("vehicle_sections")
       .insert([{ title, slug }])
       .select()
@@ -247,7 +277,7 @@ export async function POST(req: NextRequest) {
     images = ensurePositions(images);
 
     // Crear vehículo (seguimos guardando legacy URLs en columns por compat)
-    const { data: vehicle, error: vErr } = await supabaseAdmin
+    const { data: vehicle, error: vErr } = await supabaseAdmin!
       .from("vehicles")
       .insert([
         {
@@ -282,14 +312,14 @@ export async function POST(req: NextRequest) {
       position: img.position!,
     }));
 
-    const { error: imgErr } = await supabaseAdmin
+    const { error: imgErr } = await supabaseAdmin!
       .from("vehicle_images")
       .insert(rows);
 
     if (imgErr) {
       console.error("POST /api/vehicles (vehicle_images) error", imgErr);
       // rollback: borrar vehículo si falló insertar imágenes
-      await supabaseAdmin.from("vehicles").delete().eq("id", vehicle.id);
+      await supabaseAdmin!.from("vehicles").delete().eq("id", vehicle.id);
       return NextResponse.json(
         { message: "No se pudieron guardar las imágenes del vehículo." },
         { status: 500 }
@@ -297,7 +327,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Devolver vehículo con imágenes
-    const { data: fullVehicle } = await supabaseAdmin
+    const { data: fullVehicle } = await supabaseAdmin!
       .from("vehicles")
       .select(
         `
@@ -327,7 +357,7 @@ export async function POST(req: NextRequest) {
 
     const cleanTitle = (title || "").toString().trim();
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from("vehicles")
       .update({
         title: cleanTitle || undefined,
@@ -366,20 +396,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data: img, error: gErr } = await supabaseAdmin
+    const { data: img, error: gErr } = await supabaseAdmin!
       .from("vehicle_images")
       .select("id, vehicle_id, path")
       .eq("id", imageId)
       .single();
 
     if (gErr || !img) {
-      return NextResponse.json({ message: "Imagen no encontrada." }, { status: 404 });
+      return NextResponse.json(
+        { message: "Imagen no encontrada." },
+        { status: 404 }
+      );
     }
 
     // borrar storage (no bloquea si falla; loguea)
     await removeStoragePaths([img.path]);
 
-    const { error: dErr } = await supabaseAdmin
+    const { error: dErr } = await supabaseAdmin!
       .from("vehicle_images")
       .delete()
       .eq("id", imageId);
@@ -409,7 +442,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1) Paths a borrar
-    const { data: imgs, error: iErr } = await supabaseAdmin
+    const { data: imgs, error: iErr } = await supabaseAdmin!
       .from("vehicle_images")
       .select("path")
       .eq("vehicle_id", id);
@@ -422,7 +455,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2) Borrar vehículo (FK cascade elimina vehicle_images)
-    const { error } = await supabaseAdmin.from("vehicles").delete().eq("id", id);
+    const { error } = await supabaseAdmin!.from("vehicles").delete().eq("id", id);
 
     if (error) {
       console.error("POST /api/vehicles (delete_vehicle) error", error);
@@ -452,7 +485,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from("vehicle_sections")
       .update({ visible })
       .eq("id", sectionId)
