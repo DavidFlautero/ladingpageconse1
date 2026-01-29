@@ -8,8 +8,21 @@ const KEY_COLUMN = "key";
 const VALUE_COLUMN = "value";
 const KEY = "whatsapp_number";
 
+function supabaseGuard() {
+  if (!supabaseAdmin) {
+    console.error(
+      "[lib/config] Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY)."
+    );
+    return null;
+  }
+  return supabaseAdmin;
+}
+
 export async function getWhatsappNumber(): Promise<string | null> {
-  const { data, error } = await supabaseAdmin
+  const sb = supabaseGuard();
+  if (!sb) return null;
+
+  const { data, error } = await sb
     .from(TABLE)
     .select(`${VALUE_COLUMN}`)
     .eq(KEY_COLUMN, KEY)
@@ -20,7 +33,7 @@ export async function getWhatsappNumber(): Promise<string | null> {
     return null;
   }
 
-  // @ts-ignore: acceso dinámico por nombre de columna
-  const raw = data ? (data[VALUE_COLUMN] as string | null) : null;
+  // acceso dinámico por nombre de columna
+  const raw = data ? ((data as any)[VALUE_COLUMN] as string | null) : null;
   return raw ?? null;
 }
