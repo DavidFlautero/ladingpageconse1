@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
+function supabaseGuard() {
+  if (!supabaseAdmin) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message:
+          "Supabase envs faltantes. Configurá NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY (o NEXT_PUBLIC_SUPABASE_ANON_KEY).",
+      },
+      { status: 500 }
+    );
+  }
+  return null;
+}
+
 // POST: guardar lead en landing_leads
 export async function POST(req: NextRequest) {
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
   try {
     const body = await req.json();
 
@@ -80,7 +97,7 @@ export async function POST(req: NextRequest) {
       ? String(body.canal).trim()
       : null;
 
-    const { error } = await supabaseAdmin.from("landing_leads").insert([
+    const { error } = await supabaseAdmin!.from("landing_leads").insert([
       {
         nombre,
         telefono,
@@ -122,8 +139,11 @@ export async function POST(req: NextRequest) {
 
 // GET: listar últimos leads para el panel
 export async function GET() {
+  const guard = supabaseGuard();
+  if (guard) return guard;
+
   try {
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin!
       .from("landing_leads")
       .select(
         "id, nombre, email, telefono, provincia, localidad, canal, created_at"
